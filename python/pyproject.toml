@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "angel-agent-guard"
+version = "0.2.0"
+description = "Guard an AI agent before it acts: pre-purchase check for any shop, checkout or payment link, paid API, x402 endpoint or token, and a prompt-injection check for untrusted content. Zero dependencies; browser-use, LangChain/LangGraph and CrewAI tools included."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+authors = [{ name = "Oroboros Design" }]
+keywords = ["ai-agent", "agent-security", "prompt-injection", "shopping-agent", "agentic-commerce", "checkout", "phishing", "x402", "usdc", "base", "browser-use", "langchain", "langgraph", "crewai", "mcp"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Security",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+browser-use = ["browser-use>=1.0"]
+langchain = ["langchain-core>=0.3"]
+crewai = ["crewai>=0.80"]
+
+[project.urls]
+Homepage = "https://github.com/daoudandiaye98-alt/angel-agent-guard/tree/main/python"
+Repository = "https://github.com/daoudandiaye98-alt/angel-agent-guard"
+Documentation = "https://angel.oroboros-design.com/docs/prompt-injection-defense/"
+Issues = "https://github.com/daoudandiaye98-alt/angel-agent-guard/issues"
+
+[project.scripts]
+angel-agent-guard-py = "angel_agent_guard.__main__:run"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/angel_agent_guard"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/angel_agent_guard", "tests", "README.md", "LICENSE", "pyproject.toml"]

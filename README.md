@@ -17,6 +17,7 @@ No runtime dependencies. Works in Node 18+, Bun, Deno and edge runtimes with `fe
 ```bash
 npm i angel-agent-guard          # add `viem` only if the agent should pay x402 automatically
 # straight from GitHub (same build): npm i github:daoudandiaye98-alt/angel-agent-guard
+pip install angel-agent-guard    # Python: same API, zero dependencies, browser-use / LangChain / CrewAI tools (see python/)
 ```
 
 ## Quick start
