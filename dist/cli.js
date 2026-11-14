@@ -3,7 +3,7 @@
  * angel-agent-guard CLI
  *   angel-agent-guard scan "<text>" | scan https://example.com/page   → guardUntrusted
  *   angel-agent-guard scan -                                          → reads stdin
- *   angel-agent-guard verify https://api.example.com/paid [--get] [--token 0x… --chain base]
+ *   angel-agent-guard verify https://shop.example.com/checkout [--post] [--token 0x… --chain base]
  *   angel-agent-guard quick "<text>"                                  → local only, offline
  * Prints JSON. Exit code: 0 clean/pay, 1 caution/unchecked, 2 hostile/do_not_pay, 3 usage or error.
  * Env: ANGEL_PAYER_ADDRESS, ANGEL_AGENT_PRIVATE_KEY (auto-pay, needs viem), ANGEL_MAX_USDC, ANGEL_BASE_URL.
@@ -19,7 +19,7 @@ async function readStdin() {
 }
 const USAGE = `usage:
   angel-agent-guard scan "<text>" | <https-url> | -
-  angel-agent-guard verify <https-url> [--get] [--token 0x...] [--chain base|ethereum]
+  angel-agent-guard verify <https-url> [--post] [--token 0x...] [--chain base|ethereum]
   angel-agent-guard verify --token 0x... [--chain base|ethereum]
   angel-agent-guard quick "<text>" | -`;
 async function main(argv) {
@@ -52,7 +52,7 @@ async function main(argv) {
             return 3;
         }
         const chain = flag("--chain") === "ethereum" ? "ethereum" : "base";
-        const r = await verifyBeforePay({ url, token, chain, method: rest.includes("--get") ? "GET" : "POST" }, o);
+        const r = await verifyBeforePay({ url, token, chain, method: rest.includes("--post") ? "POST" : "GET" }, o);
         console.log(JSON.stringify(r, null, 2));
         return r.verdict === "pay" ? 0 : r.verdict === "do_not_pay" ? 2 : 1;
     }

@@ -1,28 +1,77 @@
 {
   "name": "angel-agent-guard",
-  "version": "0.1.0",
-  "description": "Guard an AI agent before it acts: prompt-injection check for untrusted text (local pass + 17-language hosted scan) and verify-before-pay for x402 endpoints and ERC-20 tokens. Zero runtime dependencies, x402 v2 payments built in, stdio MCP server and Coinbase AgentKit actions included.",
-  "keywords": ["ai-agent", "agent-security", "prompt-injection", "indirect-prompt-injection", "llm-security", "mcp", "model-context-protocol", "x402", "http-402", "usdc", "base", "eip-3009", "honeypot", "rug-pull", "agentkit", "coinbase-agentkit", "claude-code", "cursor"],
+  "version": "0.2.0",
+  "description": "Guard an AI agent before it acts: prompt-injection check for untrusted content, and a pre-purchase check for any shop, checkout or payment link, paid API, x402 endpoint or ERC-20 (TLS, domain age, look-alikes, redirects, payment provider, injection scan). Zero runtime dependencies, x402 v2 payer, stdio MCP server, Coinbase AgentKit actions.",
+  "mcpName": "com.oroboros-design.angel/agent-guard",
+  "keywords": [
+    "ai-agent",
+    "agent-security",
+    "prompt-injection",
+    "indirect-prompt-injection",
+    "llm-security",
+    "mcp",
+    "model-context-protocol",
+    "x402",
+    "http-402",
+    "usdc",
+    "base",
+    "eip-3009",
+    "honeypot",
+    "rug-pull",
+    "agentkit",
+    "coinbase-agentkit",
+    "claude-code",
+    "cursor",
+    "shopping-agent",
+    "agentic-commerce",
+    "checkout",
+    "phishing",
+    "stripe",
+    "shopify"
+  ],
   "homepage": "https://github.com/daoudandiaye98-alt/angel-agent-guard#readme",
-  "repository": { "type": "git", "url": "git+https://github.com/daoudandiaye98-alt/angel-agent-guard.git" },
-  "bugs": { "url": "https://github.com/daoudandiaye98-alt/angel-agent-guard/issues" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daoudandiaye98-alt/angel-agent-guard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/daoudandiaye98-alt/angel-agent-guard/issues"
+  },
   "license": "MIT",
   "author": "Oroboros Design (https://angel.oroboros-design.com)",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./agentkit": { "types": "./dist/agentkit.d.ts", "import": "./dist/agentkit.js" },
-    "./mcp": { "types": "./dist/mcp.d.ts", "import": "./dist/mcp.js" },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./agentkit": {
+      "types": "./dist/agentkit.d.ts",
+      "import": "./dist/agentkit.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp.d.ts",
+      "import": "./dist/mcp.js"
+    },
     "./package.json": "./package.json"
   },
   "bin": {
     "angel-agent-guard": "dist/cli.js",
     "angel-agent-guard-mcp": "dist/mcp.js"
   },
-  "files": ["dist", "README.md", "SKILL.md", "llms.txt", "LICENSE", ".cursor/rules"],
-  "engines": { "node": ">=18.17" },
+  "files": [
+    "dist",
+    "README.md",
+    "SKILL.md",
+    "llms.txt",
+    "LICENSE",
+    ".cursor/rules"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
   "sideEffects": false,
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -35,9 +84,15 @@
     "zod": "^3.23.8"
   },
   "peerDependenciesMeta": {
-    "@coinbase/agentkit": { "optional": true },
-    "viem": { "optional": true },
-    "zod": { "optional": true }
+    "@coinbase/agentkit": {
+      "optional": true
+    },
+    "viem": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@coinbase/agentkit": "^0.10.4",

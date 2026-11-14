@@ -4,7 +4,7 @@
  */
 import { checkOffer, decodeOffer, localVerdict, looksLikeUrl, quickScan, } from "./local.js";
 import { decodeReceipt } from "./pay.js";
-export const VERSION = "0.1.0";
+export const VERSION = "0.2.0";
 export const ANGEL_BASE = "https://angel.oroboros-design.com";
 export const PATHS = {
     inputGuard: "/agenten/signal/input-guard",
@@ -100,7 +100,9 @@ export async function guardUntrusted(input, o = {}) {
 const VRANK = { pay: 0, unchecked: 1, caution: 2, do_not_pay: 3 };
 const vmax = (a, b) => (VRANK[a] >= VRANK[b] ? a : b);
 /**
- * Check before money moves: an x402 endpoint (local probe + Angel's /preflight) and/or an ERC-20 (Angel's /token-risk).
+ * Check before money moves: any shop, checkout or payment link, API or x402 endpoint (local probe + Angel's /preflight v2:
+ * TLS, domain age, look-alikes, redirects, payment provider, card fields, injection scan of the page) and/or an ERC-20
+ * (Angel's /token-risk).
  * ok is true only when at least one check ran and every check says pay. caution: read the reasons; do_not_pay: never sign.
  */
 export async function verifyBeforePay(target, o = {}) {
@@ -120,15 +122,15 @@ export async function verifyBeforePay(target, o = {}) {
         if (!offer && o.probe !== false) {
             try {
                 const r = await (o.fetch ?? globalThis.fetch)(t.url, {
-                    method: t.method ?? "POST",
+                    method: t.method ?? "GET",
                     headers: { "content-type": "application/json", "user-agent": `angel-agent-guard/${VERSION}` },
-                    ...((t.method ?? "POST") === "POST" ? { body: "{}" } : {}),
+                    ...((t.method ?? "GET") === "POST" ? { body: "{}" } : {}),
                     signal: AbortSignal.timeout(o.timeoutMs ?? 20_000),
                 });
                 if (r.status === 402)
                     offer = decodeOffer(r.headers.get("payment-required"));
                 else
-                    reasons.push(`[info] probe: HTTP ${r.status} without payment${r.status === 200 ? " (free, or not protected for this method)" : ""}.`);
+                    reasons.push(`[info] probe: HTTP ${r.status}, no x402 offer (regular page, checkout or API).`);
             }
             catch (e) {
                 errors.push(`probe: ${e instanceof Error ? e.message : String(e)}`);
@@ -141,7 +143,7 @@ export async function verifyBeforePay(target, o = {}) {
             ran++;
         }
         if (o.remote !== false) {
-            const c = await post(PATHS.preflight, { url: t.url, method: t.method ?? "POST" }, o);
+            const c = await post(PATHS.preflight, { url: t.url, method: t.method ?? "GET" }, o);
             if (c.status === 200 && c.body) {
                 preflight = c.body;
                 const pv = c.body.verdict;
@@ -186,5 +188,12 @@ export async function verifyBeforePay(target, o = {}) {
     }
     if (!t.url && !t.token)
         errors.push("nothing to check: pass a url and/or a token");
-    return { ok: ran > 0 && verdict === "pay", verdict: ran ? verdict : "unchecked", reasons, local, preflight, token, payment, errors };
+    const num = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
+    const obj = (v) => (v && typeof v === "object" ? v : null);
+    return {
+        ok: ran > 0 && verdict === "pay", verdict: ran ? verdict : "unchecked",
+        riskScore: num(preflight?.risk_score), kind: typeof preflight?.kind === "string" ? preflight.kind : null,
+        merchant: obj(preflight?.merchant_signals), injection: obj(preflight?.injection_check),
+        reasons, local, preflight, token, payment, errors,
+    };
 }

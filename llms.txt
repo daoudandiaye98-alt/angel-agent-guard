@@ -1,6 +1,6 @@
 # angel-agent-guard
 
-> MIT-licensed TypeScript library, CLI and stdio MCP server that guard an AI agent before it acts: guardUntrusted(textOrUrl) checks untrusted content for prompt injection (local pass + hosted 17-language scan), verifyBeforePay(urlOrToken) checks an x402 endpoint or ERC-20 before paying, swapping or approving. Zero runtime dependencies; optional viem for automatic x402 v2 payments.
+> MIT-licensed TypeScript library, CLI and stdio MCP server that guard an AI agent before it acts: guardUntrusted(textOrUrl) checks untrusted content for prompt injection (local pass + hosted 17-language scan), verifyBeforePay(urlOrToken) checks any shop, checkout or payment link, paid API, x402 endpoint or ERC-20 before buying, paying or approving (TLS, domain age, look-alikes, redirects, payment provider, card fields, injection scan of the page). Zero runtime dependencies; optional viem for automatic x402 v2 payments.
 
 ## Install
 
@@ -12,7 +12,7 @@
 ## API
 
 - guardUntrusted(input, { fetch?, payerAddress?, apiKey?, remote? }) → { verdict clean|caution|hostile|unchecked, action use|read_only|drop|review, score, findings, cleaned, hiddenMessage, payment, error }
-- verifyBeforePay(url | token | { url, method, token, chain }, { maxAmountAtomic?, networks?, fetch? }) → { ok, verdict pay|caution|do_not_pay|unchecked, reasons, local, preflight, token, errors }
+- verifyBeforePay(url | token | { url, method, token, chain }, { maxAmountAtomic?, networks?, fetch? }) → { ok, verdict pay|caution|do_not_pay|unchecked, riskScore 0-100, kind checkout|shop|api|x402|web, merchant, injection, reasons, local, preflight, token, errors }
 - quickScan(text) → offline findings (unicode_tags with decoded text, markdown_image_with_query, bidi_control, zero_width, variation_selector, long_base64) and cleaned text
 - checkOffer(offer, { url, maxAmountAtomic, networks }) → static checks of a decoded x402 v2 offer
 - createX402Fetch({ privateKey | signer, maxAmountAtomic = 1000000 }) → a fetch that pays x402 v2 "exact" offers on EVM after checkOffer passes
@@ -20,8 +20,8 @@
 
 ## Hosted checks
 
-- Base https://angel.oroboros-design.com; endpoints POST /agenten/signal/input-guard {text|url}, /agenten/signal/preflight {url, method}, /agenten/signal/token-risk {token, chain}
-- 3 free calls per agent (X-Payer-Address or X-API-Key, else per IP); then USDC on Base via x402: input guard 0.99, preflight 0.25, token risk 0.99 (under the $1 default cap of @x402/core)
+- Base https://angel.oroboros-design.com; endpoints POST /agenten/signal/input-guard {text|url}, /agenten/signal/preflight {url, method} (any commerce URL), /agenten/signal/token-risk {token, chain}
+- 3 free calls per agent (X-Payer-Address or X-API-Key, else per IP); then USDC on Base via x402: pre-purchase check (preflight) 0.25, input guard 0.99, token risk 0.99 (under the $1 default cap of @x402/core)
 - Docs: https://angel.oroboros-design.com/docs/prompt-injection-defense/ and https://angel.oroboros-design.com/docs/x402-integration-guide/
 
 ## Optional

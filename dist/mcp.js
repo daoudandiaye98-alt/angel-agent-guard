@@ -36,15 +36,17 @@ export const TOOLS = [
     },
     {
         name: "verify_before_pay",
-        title: "Check an x402 endpoint or ERC-20 before paying",
-        description: "Before signing an x402 payment or swapping into / approving a token: probes the endpoint's 402 offer locally (official USDC contract, network, " +
-            "amount under your cap, EIP-712 domain, same host) and runs the hosted preflight (0.25 USDC after 3 free calls); for a token, a honeypot and " +
-            "rug-pull check of the contract (0.99 USDC after 3 free calls). Returns ok, verdict pay|caution|do_not_pay and the reasons.",
+        title: "Check a shop, checkout link, API or token before paying",
+        description: "Before any online purchase, checkout or payment link (Stripe, Shopify, PayPal …), unknown paid API or x402 payment, and before swapping into " +
+            "or approving a token: checks TLS, domain age, look-alike domains, redirects to foreign payment pages, the payment provider, card fields and " +
+            "http forms in the page, text aimed at AI agents in the page and, for x402, the offer (official USDC, amount under your cap, EIP-712 domain). " +
+            "For a token: honeypot and rug-pull traits of the contract. Returns ok, verdict pay|caution|do_not_pay, risk_score and reasons. " +
+            "0.25 USDC per check (token 0.99) after 3 free calls.",
         inputSchema: {
             type: "object",
             properties: {
-                url: { type: "string", pattern: "^https://", description: "the paid endpoint you are about to pay" },
-                method: { type: "string", enum: ["GET", "POST"], description: "its HTTP method, default POST" },
+                url: { type: "string", pattern: "^https://", description: "the shop or product page, checkout or payment link, API or x402 endpoint" },
+                method: { type: "string", enum: ["GET", "POST"], description: "HTTP method you will use, default GET" },
                 token: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$", description: "ERC-20 contract you are about to swap into or approve" },
                 chain: { type: "string", enum: ["base", "ethereum"], description: "chain of the token, default base" },
             },

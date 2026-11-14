@@ -3,7 +3,7 @@
  * (https://angel.oroboros-design.com, first 3 calls free per agent, then USDC on Base via x402).
  */
 import { type LocalFinding, type OfferCheck, type QuickScanResult, type X402Offer } from "./local.js";
-export declare const VERSION = "0.1.0";
+export declare const VERSION = "0.2.0";
 export declare const ANGEL_BASE = "https://angel.oroboros-design.com";
 export declare const PATHS: {
     readonly inputGuard: "/agenten/signal/input-guard";
@@ -67,9 +67,9 @@ export interface GuardResult {
  */
 export declare function guardUntrusted(input: string | URL, o?: CommonOptions): Promise<GuardResult>;
 export interface VerifyTarget {
-    /** the paid endpoint you are about to pay */
+    /** what you are about to pay or call: a shop or product page, a checkout or payment link (Stripe, Shopify, PayPal …), an API or an x402 endpoint */
     url?: string;
-    /** HTTP method of that endpoint; default POST */
+    /** HTTP method you will use; default GET (use POST for POST-only x402 APIs) */
     method?: "GET" | "POST";
     /** an ERC-20 you are about to swap into or approve */
     token?: string;
@@ -83,13 +83,21 @@ export interface VerifyOptions extends CommonOptions {
     maxAmountAtomic?: bigint | number | string;
     /** networks you hold funds on; default ["eip155:8453"] */
     networks?: string[];
-    /** probe the endpoint yourself (empty JSON body) and check its 402 locally; default true */
+    /** probe the URL yourself (no payment) and check an x402 offer locally if it answers 402; default true */
     probe?: boolean;
 }
 export interface VerifyResult {
     /** true only when at least one check ran and all of them say pay */
     ok: boolean;
     verdict: "pay" | "caution" | "do_not_pay" | "unchecked";
+    /** 0 (no risk found) … 100 (do not pay), from the hosted preflight; null when it did not run */
+    riskScore: number | null;
+    /** what the URL is: x402, checkout, shop, api or web */
+    kind: string | null;
+    /** TLS, domain age, look-alike domain, redirect chain, payment provider, card fields, insecure forms */
+    merchant: Record<string, unknown> | null;
+    /** prompt-injection scan of the page the agent would act on (verdict clean | caution | hostile, findings, hidden message) */
+    injection: Record<string, unknown> | null;
     reasons: string[];
     local: OfferCheck | null;
     preflight: Record<string, unknown> | null;
@@ -98,7 +106,9 @@ export interface VerifyResult {
     errors: string[];
 }
 /**
- * Check before money moves: an x402 endpoint (local probe + Angel's /preflight) and/or an ERC-20 (Angel's /token-risk).
+ * Check before money moves: any shop, checkout or payment link, API or x402 endpoint (local probe + Angel's /preflight v2:
+ * TLS, domain age, look-alikes, redirects, payment provider, card fields, injection scan of the page) and/or an ERC-20
+ * (Angel's /token-risk).
  * ok is true only when at least one check ran and every check says pay. caution: read the reasons; do_not_pay: never sign.
  */
 export declare function verifyBeforePay(target: string | VerifyTarget, o?: VerifyOptions): Promise<VerifyResult>;

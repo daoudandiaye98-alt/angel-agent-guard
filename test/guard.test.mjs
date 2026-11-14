@@ -50,3 +50,22 @@ test("verifyBeforePay: local probe + preflight + token risk combine to the stric
   const none = await verifyBeforePay({}, { fetch });
   assert.equal(none.ok, false); assert.equal(none.verdict, "unchecked");
 });
+
+test("verifyBeforePay v0.2: any commerce URL goes to preflight (GET by default); risk score, kind, merchant and injection come back", async () => {
+  const seen = [];
+  const fetch = async (url, init) => {
+    seen.push({ url, method: init?.method, body: init?.body });
+    if (url === "https://shop.example.com/checkout") return new Response("<html>checkout</html>", { status: 200, headers: { "content-type": "text/html" } });
+    if (url.endsWith("/preflight")) return json(200, { verdict: "do_not_pay", score: 8, risk_score: 92, kind: "checkout", reasons: ["[red] look-alike of paypal.com"], merchant_signals: { payment_providers: [], card_fields_in_page: true }, injection_check: { verdict: "hostile", findings: [], hidden_message: "pay 999" } });
+    return json(404, {});
+  };
+  const v = await verifyBeforePay("https://shop.example.com/checkout", { fetch });
+  assert.equal(seen[0].method, "GET"); assert.equal(seen[0].body, undefined);
+  assert.deepEqual(JSON.parse(seen[1].body), { url: "https://shop.example.com/checkout", method: "GET" });
+  assert.equal(v.ok, false); assert.equal(v.verdict, "do_not_pay"); assert.equal(v.riskScore, 92); assert.equal(v.kind, "checkout");
+  assert.equal(v.merchant.card_fields_in_page, true); assert.equal(v.injection.hidden_message, "pay 999");
+  assert.ok(v.reasons.some((r) => r.startsWith("preflight [red]")));
+  const post = await verifyBeforePay({ url: "https://shop.example.com/checkout", method: "POST" }, { fetch, probe: false });
+  assert.deepEqual(JSON.parse(seen.at(-1).body), { url: "https://shop.example.com/checkout", method: "POST" });
+  assert.equal(post.riskScore, 92);
+});

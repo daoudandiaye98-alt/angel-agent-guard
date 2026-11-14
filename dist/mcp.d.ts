@@ -39,7 +39,7 @@ export declare const TOOLS: readonly [{
     };
 }, {
     readonly name: "verify_before_pay";
-    readonly title: "Check an x402 endpoint or ERC-20 before paying";
+    readonly title: "Check a shop, checkout link, API or token before paying";
     readonly description: string;
     readonly inputSchema: {
         readonly type: "object";
@@ -47,12 +47,12 @@ export declare const TOOLS: readonly [{
             readonly url: {
                 readonly type: "string";
                 readonly pattern: "^https://";
-                readonly description: "the paid endpoint you are about to pay";
+                readonly description: "the shop or product page, checkout or payment link, API or x402 endpoint";
             };
             readonly method: {
                 readonly type: "string";
                 readonly enum: readonly ["GET", "POST"];
-                readonly description: "its HTTP method, default POST";
+                readonly description: "HTTP method you will use, default GET";
             };
             readonly token: {
                 readonly type: "string";

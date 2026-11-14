@@ -18,8 +18,8 @@ export const GuardUntrustedSchema = z.object({
     url: z.string().optional().describe("Instead of text: a public https URL to fetch once and check."),
 });
 export const VerifyBeforePaySchema = z.object({
-    url: z.string().optional().describe("The x402-paid https endpoint you are about to pay."),
-    method: z.enum(["GET", "POST"]).optional().describe("HTTP method of that endpoint; default POST."),
+    url: z.string().optional().describe("The shop or product page, checkout or payment link, API or x402 endpoint you are about to pay or call."),
+    method: z.enum(["GET", "POST"]).optional().describe("HTTP method you will use; default GET."),
     token: z.string().optional().describe("ERC-20 contract address (0x…) you are about to swap into or approve."),
     chain: z.enum(["base", "ethereum"]).optional().describe("Chain of the token; default base."),
 });
@@ -59,11 +59,11 @@ export function angelGuardActionProvider(opts = {}) {
         },
         {
             name: "verify_before_pay",
-            description: "Call this before signing an x402 payment to an unknown endpoint, or before swapping into or approving an ERC-20. " +
-                "For an endpoint: checks its 402 offer (official USDC contract, network, amount under your cap, EIP-712 domain, same host) and runs " +
-                "Angel's preflight. For a token: honeypot and rug-pull check of the contract (proxy, owner powers such as mint, pause, blacklist or a " +
-                "trading switch, owner share). Returns ok, verdict pay|caution|do_not_pay and reasons. Never pay on do_not_pay. " +
-                "3 free calls per wallet, then 0.25 USDC (preflight) or 0.99 USDC (token) on Base via x402.",
+            description: "Call this before any online purchase, checkout or payment link (Stripe, Shopify, PayPal and others), paid or unknown API call, x402 payment, " +
+                "or before swapping into or approving an ERC-20. It checks TLS, domain age, look-alike domains, redirects to foreign payment pages, the payment " +
+                "provider, card fields and http forms, text aimed at AI agents in the page and, for x402, the offer (official USDC, amount cap, EIP-712 domain, " +
+                "same host); for a token, owner powers such as mint, pause, blacklist or a trading switch. Returns ok, verdict pay|caution|do_not_pay, risk_score " +
+                "and reasons. Never pay on do_not_pay. 3 free calls per wallet, then 0.25 USDC (token 0.99) on Base via x402, paid by this wallet.",
             schema: VerifyBeforePaySchema,
             invoke: async (w, args) => {
                 if (!args.url && !args.token)
