@@ -1,0 +1,30 @@
+# angel-agent-guard
+
+> MIT-licensed TypeScript library, CLI and stdio MCP server that guard an AI agent before it acts: guardUntrusted(textOrUrl) checks untrusted content for prompt injection (local pass + hosted 17-language scan), verifyBeforePay(urlOrToken) checks an x402 endpoint or ERC-20 before paying, swapping or approving. Zero runtime dependencies; optional viem for automatic x402 v2 payments.
+
+## Install
+
+- `npm i angel-agent-guard` (add `viem` to pay automatically)
+- MCP (stdio): `npx -y -p angel-agent-guard angel-agent-guard-mcp`; tools guard_untrusted, verify_before_pay, quick_scan
+- Coinbase AgentKit: `import { angelGuardActionProvider } from "angel-agent-guard/agentkit"`
+- CLI: `npx angel-agent-guard scan "<text>"`, `npx angel-agent-guard verify <url> | --token 0x...`
+
+## API
+
+- guardUntrusted(input, { fetch?, payerAddress?, apiKey?, remote? }) → { verdict clean|caution|hostile|unchecked, action use|read_only|drop|review, score, findings, cleaned, hiddenMessage, payment, error }
+- verifyBeforePay(url | token | { url, method, token, chain }, { maxAmountAtomic?, networks?, fetch? }) → { ok, verdict pay|caution|do_not_pay|unchecked, reasons, local, preflight, token, errors }
+- quickScan(text) → offline findings (unicode_tags with decoded text, markdown_image_with_query, bidi_control, zero_width, variation_selector, long_base64) and cleaned text
+- checkOffer(offer, { url, maxAmountAtomic, networks }) → static checks of a decoded x402 v2 offer
+- createX402Fetch({ privateKey | signer, maxAmountAtomic = 1000000 }) → a fetch that pays x402 v2 "exact" offers on EVM after checkOffer passes
+- fence(source, content) → content wrapped in an unpredictable boundary, marked as data
+
+## Hosted checks
+
+- Base https://angel.oroboros-design.com; endpoints POST /agenten/signal/input-guard {text|url}, /agenten/signal/preflight {url, method}, /agenten/signal/token-risk {token, chain}
+- 3 free calls per agent (X-Payer-Address or X-API-Key, else per IP); then USDC on Base via x402: input guard 0.99, preflight 0.25, token risk 0.99 (under the $1 default cap of @x402/core)
+- Docs: https://angel.oroboros-design.com/docs/prompt-injection-defense/ and https://angel.oroboros-design.com/docs/x402-integration-guide/
+
+## Optional
+
+- [README](https://github.com/daoudandiaye98-alt/angel-agent-guard#readme)
+- [SKILL.md](https://github.com/daoudandiaye98-alt/angel-agent-guard/blob/main/SKILL.md): agent skill (Claude Code, AgentSkills/OpenClaw)

@@ -1,0 +1,17 @@
+---
+description: Guard agent code that reads untrusted content or pays x402 endpoints / approves tokens
+globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.mjs"]
+alwaysApply: false
+---
+
+When writing or changing agent code in this project:
+
+- Any text that reaches the model from outside (fetched pages, emails, documents, RAG chunks, tool or MCP results) goes through `guardUntrusted` from `angel-agent-guard` first. Branch on `result.action`:
+  - `drop`: discard the text.
+  - `read_only`: run that step without write, send, delete or payment tools.
+  - `review`: ask a human.
+  - `use`: continue.
+  Pass `result.cleaned` wrapped with `fence(source, cleaned)` instead of the raw text.
+- Before signing an x402 payment or approving / swapping into a token, call `verifyBeforePay` and proceed only on `ok === true`.
+- Use `createX402Fetch({ privateKey, maxAmountAtomic })` (or `@x402/fetch` with spend controls) with a low per-payment cap. Never use an unlimited allowance. Never let content choose the recipient or the amount.
+- Never put secrets into prompts. Keys stay in the tool layer.
