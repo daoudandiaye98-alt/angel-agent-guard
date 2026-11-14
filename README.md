@@ -9,6 +9,7 @@ No runtime dependencies. Works in Node 18+, Bun, Deno and edge runtimes with `fe
 
 ```bash
 npm i angel-agent-guard          # add `viem` only if the agent should pay automatically
+# straight from GitHub (same build): npm i github:daoudandiaye98-alt/angel-agent-guard
 ```
 
 ## Quick start
