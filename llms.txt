@@ -17,6 +17,7 @@
 - checkOffer(offer, { url, maxAmountAtomic, networks }) → static checks of a decoded x402 v2 offer
 - createX402Fetch({ privateKey | signer, maxAmountAtomic = 1000000 }) → a fetch that pays x402 v2 "exact" offers on EVM after checkOffer passes
 - fence(source, content) → content wrapped in an unpredictable boundary, marked as data
+- angel-agent-guard/ai-sdk: guardUntrusted(), verifyBeforePay(), quickScanUntrusted(), angelGuardTools() as Vercel AI SDK tools (ai 5, 6, 7)
 
 ## Hosted checks
 

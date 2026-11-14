@@ -12,7 +12,7 @@ Two checks an AI agent should run before it acts:
   - for x402: the payment offer itself (official USDC, network, amount under your cap, same host)
   - for an ERC-20: honeypot and rug-pull powers on chain
 
-No runtime dependencies. Works in Node 18+, Bun, Deno and edge runtimes with `fetch`. It also ships an x402 v2 payer, a stdio MCP server, a CLI and Coinbase AgentKit actions.
+No runtime dependencies. Works in Node 18+, Bun, Deno and edge runtimes with `fetch`. It also ships an x402 v2 payer, a stdio MCP server, a CLI, Vercel AI SDK tools and Coinbase AgentKit actions.
 
 ```bash
 npm i angel-agent-guard          # add `viem` only if the agent should pay x402 automatically
@@ -102,6 +102,29 @@ claude mcp add angel-guard -- npx -y -p angel-agent-guard angel-agent-guard-mcp
 Tools: `guard_untrusted`, `verify_before_pay`, `quick_scan` (offline). Optional env: `ANGEL_AGENT_PRIVATE_KEY` (auto-pay, needs `viem`), `ANGEL_MAX_USDC` (cap, default 1.00), `ANGEL_BASE_URL`. Listed in the official MCP Registry as `com.oroboros-design.angel/agent-guard`.
 
 If your client supports remote servers, the full hosted suite (28 tools) is also available at `https://angel.oroboros-design.com/agenten/signal/mcp`.
+
+## Vercel AI SDK
+
+```bash
+npm i angel-agent-guard ai
+```
+
+```ts
+import { generateText, isStepCount } from "ai";
+import { verifyBeforePay, guardUntrusted } from "angel-agent-guard/ai-sdk";
+
+const { text } = await generateText({
+  model: "openai/gpt-5-mini",
+  prompt: "Buy the cheapest USB-C cable on https://shop.example.com, but check the checkout page before paying.",
+  tools: {
+    verifyBeforePay: verifyBeforePay({ payerAddress: process.env.AGENT_WALLET }),
+    guardUntrusted: guardUntrusted(),
+  },
+  stopWhen: isStepCount(5),
+});
+```
+
+Works with AI SDK 5, 6 and 7. `angelGuardTools(options)` returns all three tools (`guardUntrusted`, `verifyBeforePay`, `quickScanUntrusted`) to spread into `tools`. Every factory takes the core options (`payerAddress`, `apiKey`, `fetch`, `baseUrl`, `timeoutMs`, `remote`). Pass `privateKey` and `maxUsdc` to pay x402 automatically after the free calls (needs `viem`). `ANGEL_PAYER_ADDRESS` and `ANGEL_AGENT_PRIVATE_KEY` are read from the environment when set. No API key is needed.
 
 ## Coinbase AgentKit
 

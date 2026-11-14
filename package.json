@@ -1,7 +1,7 @@
 {
   "name": "angel-agent-guard",
   "version": "0.2.0",
-  "description": "Guard an AI agent before it acts: prompt-injection check for untrusted content, and a pre-purchase check for any shop, checkout or payment link, paid API, x402 endpoint or ERC-20 (TLS, domain age, look-alikes, redirects, payment provider, injection scan). Zero runtime dependencies, x402 v2 payer, stdio MCP server, Coinbase AgentKit actions.",
+  "description": "Guard an AI agent before it acts: prompt-injection check for untrusted content, and a pre-purchase check for any shop, checkout or payment link, paid API, x402 endpoint or ERC-20 (TLS, domain age, look-alikes, redirects, payment provider, injection scan). Zero runtime dependencies, x402 v2 payer, stdio MCP server, Vercel AI SDK tools, Coinbase AgentKit actions.",
   "mcpName": "com.oroboros-design.angel/agent-guard",
   "keywords": [
     "ai-agent",
@@ -27,7 +27,9 @@
     "checkout",
     "phishing",
     "stripe",
-    "shopify"
+    "shopify",
+    "vercel-ai-sdk",
+    "ai-sdk"
   ],
   "homepage": "https://github.com/daoudandiaye98-alt/angel-agent-guard#readme",
   "repository": {
@@ -50,6 +52,10 @@
     "./agentkit": {
       "types": "./dist/agentkit.d.ts",
       "import": "./dist/agentkit.js"
+    },
+    "./ai-sdk": {
+      "types": "./dist/ai-sdk.d.ts",
+      "import": "./dist/ai-sdk.js"
     },
     "./mcp": {
       "types": "./dist/mcp.d.ts",
@@ -80,11 +86,15 @@
   },
   "peerDependencies": {
     "@coinbase/agentkit": ">=0.10.0",
+    "ai": ">=5.0.0",
     "viem": "^2.0.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8 || ^4.0.0"
   },
   "peerDependenciesMeta": {
     "@coinbase/agentkit": {
+      "optional": true
+    },
+    "ai": {
       "optional": true
     },
     "viem": {
@@ -97,6 +107,7 @@
   "devDependencies": {
     "@coinbase/agentkit": "^0.10.4",
     "@types/node": "^22.10.0",
+    "ai": "^7.0.173",
     "typescript": "^5.6.0",
     "viem": "^2.38.3",
     "zod": "^3.23.8"
