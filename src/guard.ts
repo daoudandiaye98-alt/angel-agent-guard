@@ -9,7 +9,7 @@ import {
 } from "./local.js";
 import { decodeReceipt } from "./pay.js";
 
-export const VERSION = "0.2.0";
+export const VERSION = "0.2.1";
 export const ANGEL_BASE = "https://angel.oroboros-design.com";
 export const PATHS = {
   inputGuard: "/agenten/signal/input-guard",
@@ -195,6 +195,9 @@ export interface VerifyResult {
   merchant: Record<string, unknown> | null;
   /** prompt-injection scan of the page the agent would act on (verdict clean | caution | hostile, findings, hidden message) */
   injection: Record<string, unknown> | null;
+  /** only on verdict pay for a merchant with an affiliate program: the same merchant with Angel's partner tag. Disclosed:
+      Angel may earn a commission, the merchant sets the price; the checked URL is just as safe. */
+  partnerLink: { url: string; network: string; same_merchant: boolean; disclosure: string } | null;
   reasons: string[];
   local: OfferCheck | null;
   preflight: Record<string, unknown> | null;
@@ -294,6 +297,7 @@ export async function verifyBeforePay(target: string | VerifyTarget, o: VerifyOp
     ok: ran > 0 && verdict === "pay", verdict: ran ? verdict : "unchecked",
     riskScore: num(preflight?.risk_score), kind: typeof preflight?.kind === "string" ? preflight.kind : null,
     merchant: obj(preflight?.merchant_signals), injection: obj(preflight?.injection_check),
+    partnerLink: (obj(preflight?.partner_link) as VerifyResult["partnerLink"]) ?? null,
     reasons, local, preflight, token, payment, errors,
   };
 }

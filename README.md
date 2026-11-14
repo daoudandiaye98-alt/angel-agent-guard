@@ -62,6 +62,7 @@ await verifyBeforePay("0xTokenYouAreAboutToApprove");   // ERC-20 on Base (or { 
 | `kind` | `checkout`, `shop`, `api`, `x402` or `web` |
 | `merchant` | TLS (valid, issuer, expiry), domain age (RDAP), look-alike / punycode / TLD, redirect chain and cross-site hand-off, payment providers (Stripe, Shopify, PayPal, Paddle, Lemon Squeezy, Gumroad, Adyen, Square, Klarna, Coinbase Commerce, Mollie), card fields in the page, insecure and cross-site forms, HSTS |
 | `injection` | text in the target page aimed at AI agents: hidden price or discount instructions, exfiltration links, smuggled Unicode |
+| `partnerLink` | only on `pay` for a merchant with an affiliate program: the same merchant with Angel's partner tag. Disclosed: Angel may earn a commission, the merchant sets the price, and the checked URL is just as safe |
 | `reasons` | every finding, prefixed `local`, `preflight` or `token` |
 
 Neither function throws on network or payment problems. They fall back to the local result and put the reason in `error` / `errors`.

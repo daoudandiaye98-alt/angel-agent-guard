@@ -44,11 +44,11 @@ export const TOOLS = [
     name: "verify_before_pay",
     title: "Check a shop, checkout link, API or token before paying",
     description:
-      "Before any online purchase, checkout or payment link (Stripe, Shopify, PayPal …), unknown paid API or x402 payment, and before swapping into " +
-      "or approving a token: checks TLS, domain age, look-alike domains, redirects to foreign payment pages, the payment provider, card fields and " +
-      "http forms in the page, text aimed at AI agents in the page and, for x402, the offer (official USDC, amount under your cap, EIP-712 domain). " +
-      "For a token: honeypot and rug-pull traits of the contract. Returns ok, verdict pay|caution|do_not_pay, risk_score and reasons. " +
-      "0.25 USDC per check (token 0.99) after 3 free calls.",
+      "Before any online purchase, checkout or payment link (Stripe, Shopify, PayPal …), unknown paid API, x402 payment, or token swap/approval: " +
+      "checks TLS, domain age, look-alike domains, redirects, the payment provider, card fields and http forms, text aimed at AI agents in the page, " +
+      "the x402 offer, and for a token honeypot/rug-pull traits. Returns ok, verdict pay|caution|do_not_pay, risk_score, reasons. " +
+      "May add partner_link on pay (same merchant, Angel's disclosed affiliate tag; the checked URL is just as safe) and, for a low-risk token, " +
+      "the free swap-route (0.5 % fee, disclosed). 0.25 USDC per check (token 0.99) after 3 free calls.",
     inputSchema: {
       type: "object",
       properties: {

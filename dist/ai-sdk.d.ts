@@ -355,6 +355,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }>;
@@ -368,6 +374,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
         reasons: string[];
         merchant: Record<string, unknown> | null;
         injection: Record<string, unknown> | null;
+        partnerLink: {
+            url: string;
+            network: string;
+            same_merchant: boolean;
+            disclosure: string;
+        } | null;
         payment: import("./guard.js").PaymentNeeded | null;
         errors: string[];
     }> | undefined;
@@ -379,6 +391,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
         reasons: string[];
         merchant: Record<string, unknown> | null;
         injection: Record<string, unknown> | null;
+        partnerLink: {
+            url: string;
+            network: string;
+            same_merchant: boolean;
+            disclosure: string;
+        } | null;
         payment: import("./guard.js").PaymentNeeded | null;
         errors: string[];
     }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -406,6 +424,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
         reasons: string[];
         merchant: Record<string, unknown> | null;
         injection: Record<string, unknown> | null;
+        partnerLink: {
+            url: string;
+            network: string;
+            same_merchant: boolean;
+            disclosure: string;
+        } | null;
         payment: import("./guard.js").PaymentNeeded | null;
         errors: string[];
     }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -435,6 +459,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }>;
@@ -448,6 +478,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
         reasons: string[];
         merchant: Record<string, unknown> | null;
         injection: Record<string, unknown> | null;
+        partnerLink: {
+            url: string;
+            network: string;
+            same_merchant: boolean;
+            disclosure: string;
+        } | null;
         payment: import("./guard.js").PaymentNeeded | null;
         errors: string[];
     }> | undefined;
@@ -459,6 +495,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
         reasons: string[];
         merchant: Record<string, unknown> | null;
         injection: Record<string, unknown> | null;
+        partnerLink: {
+            url: string;
+            network: string;
+            same_merchant: boolean;
+            disclosure: string;
+        } | null;
         payment: import("./guard.js").PaymentNeeded | null;
         errors: string[];
     }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -486,6 +528,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
         reasons: string[];
         merchant: Record<string, unknown> | null;
         injection: Record<string, unknown> | null;
+        partnerLink: {
+            url: string;
+            network: string;
+            same_merchant: boolean;
+            disclosure: string;
+        } | null;
         payment: import("./guard.js").PaymentNeeded | null;
         errors: string[];
     }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -515,6 +563,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }>;
@@ -528,6 +582,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
         reasons: string[];
         merchant: Record<string, unknown> | null;
         injection: Record<string, unknown> | null;
+        partnerLink: {
+            url: string;
+            network: string;
+            same_merchant: boolean;
+            disclosure: string;
+        } | null;
         payment: import("./guard.js").PaymentNeeded | null;
         errors: string[];
     }> | undefined;
@@ -539,6 +599,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
         reasons: string[];
         merchant: Record<string, unknown> | null;
         injection: Record<string, unknown> | null;
+        partnerLink: {
+            url: string;
+            network: string;
+            same_merchant: boolean;
+            disclosure: string;
+        } | null;
         payment: import("./guard.js").PaymentNeeded | null;
         errors: string[];
     }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -561,6 +627,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
         reasons: string[];
         merchant: Record<string, unknown> | null;
         injection: Record<string, unknown> | null;
+        partnerLink: {
+            url: string;
+            network: string;
+            same_merchant: boolean;
+            disclosure: string;
+        } | null;
         payment: import("./guard.js").PaymentNeeded | null;
         errors: string[];
     }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -590,6 +662,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }>;
@@ -603,6 +681,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
         reasons: string[];
         merchant: Record<string, unknown> | null;
         injection: Record<string, unknown> | null;
+        partnerLink: {
+            url: string;
+            network: string;
+            same_merchant: boolean;
+            disclosure: string;
+        } | null;
         payment: import("./guard.js").PaymentNeeded | null;
         errors: string[];
     }> | undefined;
@@ -614,6 +698,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
         reasons: string[];
         merchant: Record<string, unknown> | null;
         injection: Record<string, unknown> | null;
+        partnerLink: {
+            url: string;
+            network: string;
+            same_merchant: boolean;
+            disclosure: string;
+        } | null;
         payment: import("./guard.js").PaymentNeeded | null;
         errors: string[];
     }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -636,6 +726,12 @@ export declare function verifyBeforePay(o?: AiSdkToolOptions & Pick<VerifyOption
         reasons: string[];
         merchant: Record<string, unknown> | null;
         injection: Record<string, unknown> | null;
+        partnerLink: {
+            url: string;
+            network: string;
+            same_merchant: boolean;
+            disclosure: string;
+        } | null;
         payment: import("./guard.js").PaymentNeeded | null;
         errors: string[];
     }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -1231,6 +1327,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
                 reasons: string[];
                 merchant: Record<string, unknown> | null;
                 injection: Record<string, unknown> | null;
+                partnerLink: {
+                    url: string;
+                    network: string;
+                    same_merchant: boolean;
+                    disclosure: string;
+                } | null;
                 payment: import("./guard.js").PaymentNeeded | null;
                 errors: string[];
             }>;
@@ -1244,6 +1346,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }> | undefined;
@@ -1255,6 +1363,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -1282,6 +1396,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -1311,6 +1431,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
                 reasons: string[];
                 merchant: Record<string, unknown> | null;
                 injection: Record<string, unknown> | null;
+                partnerLink: {
+                    url: string;
+                    network: string;
+                    same_merchant: boolean;
+                    disclosure: string;
+                } | null;
                 payment: import("./guard.js").PaymentNeeded | null;
                 errors: string[];
             }>;
@@ -1324,6 +1450,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }> | undefined;
@@ -1335,6 +1467,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -1362,6 +1500,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -1391,6 +1535,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
                 reasons: string[];
                 merchant: Record<string, unknown> | null;
                 injection: Record<string, unknown> | null;
+                partnerLink: {
+                    url: string;
+                    network: string;
+                    same_merchant: boolean;
+                    disclosure: string;
+                } | null;
                 payment: import("./guard.js").PaymentNeeded | null;
                 errors: string[];
             }>;
@@ -1404,6 +1554,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }> | undefined;
@@ -1415,6 +1571,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -1437,6 +1599,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -1466,6 +1634,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
                 reasons: string[];
                 merchant: Record<string, unknown> | null;
                 injection: Record<string, unknown> | null;
+                partnerLink: {
+                    url: string;
+                    network: string;
+                    same_merchant: boolean;
+                    disclosure: string;
+                } | null;
                 payment: import("./guard.js").PaymentNeeded | null;
                 errors: string[];
             }>;
@@ -1479,6 +1653,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }> | undefined;
@@ -1490,6 +1670,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }, NoInfer<import("@ai-sdk/provider-utils").Context>>;
@@ -1512,6 +1698,12 @@ export declare function angelGuardTools(o?: AiSdkToolOptions): {
             reasons: string[];
             merchant: Record<string, unknown> | null;
             injection: Record<string, unknown> | null;
+            partnerLink: {
+                url: string;
+                network: string;
+                same_merchant: boolean;
+                disclosure: string;
+            } | null;
             payment: import("./guard.js").PaymentNeeded | null;
             errors: string[];
         }, NoInfer<import("@ai-sdk/provider-utils").Context>>;

@@ -97,7 +97,7 @@ export function verifyBeforePay(o: AiSdkToolOptions & Pick<VerifyOptions, "maxAm
       const r = await verifyCore({ url, method, token, chain }, vopts);
       return {
         ok: r.ok, verdict: r.verdict, riskScore: r.riskScore, kind: r.kind,
-        reasons: r.reasons.slice(0, 12), merchant: r.merchant, injection: r.injection,
+        reasons: r.reasons.slice(0, 12), merchant: r.merchant, injection: r.injection, partnerLink: r.partnerLink,
         payment: r.payment, errors: r.errors,
       };
     },

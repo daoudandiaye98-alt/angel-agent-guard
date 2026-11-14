@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Sequence
 from ._http import Response, Transport, client_transport, urllib_transport
 from ._local import LocalFinding, OfferCheck, QuickScanResult, check_offer, decode_offer, local_verdict, looks_like_url, quick_scan
 
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 ANGEL_BASE = "https://angel.oroboros-design.com"
 PATHS = {"input_guard": "/agenten/signal/input-guard", "preflight": "/agenten/signal/preflight", "token_risk": "/agenten/signal/token-risk"}
 
@@ -69,6 +69,7 @@ class VerifyResult:
     kind: Optional[str] = None  # checkout | shop | api | x402 | web
     merchant: Optional[Dict[str, Any]] = None  # TLS, domain age, look-alike, redirects, payment providers, card fields
     injection: Optional[Dict[str, Any]] = None  # text in the page aimed at agents
+    partner_link: Optional[Dict[str, Any]] = None  # disclosed affiliate link for the same merchant (only on pay); the checked URL is just as safe
     reasons: List[str] = field(default_factory=list)
     local: Optional[OfferCheck] = None
     preflight: Optional[Dict[str, Any]] = None
@@ -87,6 +88,8 @@ class VerifyResult:
             "payment_providers": m.get("payment_providers"), "injection": (self.injection or {}).get("verdict"),
             "reasons": self.reasons[:8],
         }
+        if self.partner_link:
+            out["partner_link"] = self.partner_link
         if self.payment:
             out["payment_needed"] = {"price_usdc": self.payment.price_usdc, "pay_by_card": self.payment.pay_by_card}
         if self.errors:
@@ -296,6 +299,7 @@ def verify_before_pay(
     res.kind = p.get("kind") if isinstance(p.get("kind"), str) else None
     res.merchant = p.get("merchant_signals") if isinstance(p.get("merchant_signals"), dict) else None
     res.injection = p.get("injection_check") if isinstance(p.get("injection_check"), dict) else None
+    res.partner_link = p.get("partner_link") if isinstance(p.get("partner_link"), dict) else None
     res.reasons, res.errors = reasons, errors
     return res
 

@@ -3,7 +3,7 @@
  * (https://angel.oroboros-design.com, first 3 calls free per agent, then USDC on Base via x402).
  */
 import { type LocalFinding, type OfferCheck, type QuickScanResult, type X402Offer } from "./local.js";
-export declare const VERSION = "0.2.0";
+export declare const VERSION = "0.2.1";
 export declare const ANGEL_BASE = "https://angel.oroboros-design.com";
 export declare const PATHS: {
     readonly inputGuard: "/agenten/signal/input-guard";
@@ -98,6 +98,14 @@ export interface VerifyResult {
     merchant: Record<string, unknown> | null;
     /** prompt-injection scan of the page the agent would act on (verdict clean | caution | hostile, findings, hidden message) */
     injection: Record<string, unknown> | null;
+    /** only on verdict pay for a merchant with an affiliate program: the same merchant with Angel's partner tag. Disclosed:
+        Angel may earn a commission, the merchant sets the price; the checked URL is just as safe. */
+    partnerLink: {
+        url: string;
+        network: string;
+        same_merchant: boolean;
+        disclosure: string;
+    } | null;
     reasons: string[];
     local: OfferCheck | null;
     preflight: Record<string, unknown> | null;

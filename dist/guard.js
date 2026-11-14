@@ -4,7 +4,7 @@
  */
 import { checkOffer, decodeOffer, localVerdict, looksLikeUrl, quickScan, } from "./local.js";
 import { decodeReceipt } from "./pay.js";
-export const VERSION = "0.2.0";
+export const VERSION = "0.2.1";
 export const ANGEL_BASE = "https://angel.oroboros-design.com";
 export const PATHS = {
     inputGuard: "/agenten/signal/input-guard",
@@ -194,6 +194,7 @@ export async function verifyBeforePay(target, o = {}) {
         ok: ran > 0 && verdict === "pay", verdict: ran ? verdict : "unchecked",
         riskScore: num(preflight?.risk_score), kind: typeof preflight?.kind === "string" ? preflight.kind : null,
         merchant: obj(preflight?.merchant_signals), injection: obj(preflight?.injection_check),
+        partnerLink: obj(preflight?.partner_link) ?? null,
         reasons, local, preflight, token, payment, errors,
     };
 }
