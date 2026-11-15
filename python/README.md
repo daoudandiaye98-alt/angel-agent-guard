@@ -106,9 +106,9 @@ The local checks are free. The hosted checks run on [Angel](https://angel.orobor
 
 | Check | Price per call |
 |---|---|
-| pre-purchase check | 0.25 USDC |
-| input guard | 0.99 USDC |
-| token risk | 0.99 USDC |
+| pre-purchase check | 0.015 USDC |
+| input guard | 0.015 USDC |
+| token risk | 0.015 USDC |
 
 Pass `payer_address` (or set `ANGEL_PAYER_ADDRESS`) so that your wallet gets its own 3 free calls. Without it, the free calls are shared by IP. Once the free calls are used up, the result carries `payment`, which holds the x402 offer, the price and a card checkout link a human can open.
 

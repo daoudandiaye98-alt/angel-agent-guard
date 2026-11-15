@@ -9,12 +9,13 @@ import {
 } from "./local.js";
 import { decodeReceipt } from "./pay.js";
 
-export const VERSION = "0.2.1";
+export const VERSION = "0.3.0";
 export const ANGEL_BASE = "https://angel.oroboros-design.com";
 export const PATHS = {
   inputGuard: "/agenten/signal/input-guard",
   preflight: "/agenten/signal/preflight",
   tokenRisk: "/agenten/signal/token-risk",
+  stealthRead: "/agenten/signal/stealth-read",
 } as const;
 
 export interface CommonOptions {
@@ -47,7 +48,7 @@ export interface RemoteFinding {
 export interface PaymentNeeded {
   /** the x402 v2 offer (decoded PAYMENT-REQUIRED) */
   offer: X402Offer | null;
-  /** price in USDC as text, e.g. "0.99" */
+  /** price in USDC as text, e.g. "0.015" */
   priceUsdc: string | null;
   /** a card checkout link a human can open */
   payByCard: string | null;
@@ -107,12 +108,19 @@ async function post(path: string, body: unknown, o: CommonOptions): Promise<Call
   }
 }
 
+/** atomic USDC (6 decimals) as text without trailing zeros: "15000" → "0.015", "990000" → "0.99", "1000000" → "1" */
+const usdcText = (atomic: string): string => {
+  const n = BigInt(atomic);
+  const frac = (n % 1_000_000n).toString().padStart(6, "0").replace(/0+$/, "");
+  return `${n / 1_000_000n}${frac ? `.${frac}` : ""}`;
+};
+
 function paymentFrom(c: Call): PaymentNeeded {
   const offer = decodeOffer(c.headers?.get("payment-required")) ?? (c.body && Array.isArray(c.body.accepts) ? (c.body as unknown as X402Offer) : null);
   const amount = offer?.accepts?.[0]?.amount;
   return {
     offer,
-    priceUsdc: amount ? (Number(amount) / 1e6).toFixed(2) : typeof c.body?.price_usd === "string" ? c.body.price_usd : null,
+    priceUsdc: amount ? usdcText(amount) : typeof c.body?.price_usd === "string" ? c.body.price_usd : null,
     payByCard: typeof c.body?.pay_by_card === "string" ? c.body.pay_by_card : null,
     message: typeof c.body?.task_blocked === "string" ? c.body.task_blocked : typeof c.body?.error === "string" ? c.body.error : null,
   };
@@ -157,6 +165,65 @@ export async function guardUntrusted(input: string | URL, o: CommonOptions = {})
     return { ...base, payment: paymentFrom(c), freeCallsRemaining: 0, error: "payment_required: free calls used; pay via x402 (pass a paying fetch) or by card" };
   }
   return { ...base, error: c.error ?? `input guard HTTP ${c.status}${typeof c.body?.message === "string" ? `: ${c.body.message}` : ""}` };
+}
+
+/* ------------------------------------------------------------------ readSafeUrl */
+
+export interface SafeReadResult {
+  /** true when Angel read the page; markdown is then set */
+  ok: boolean;
+  /** the final URL after redirects (or the one you asked for) */
+  url: string;
+  title: string | null;
+  lang: string | null;
+  /** the main content as Markdown: navigation, scripts and hidden HTML removed, text aimed at the model replaced by ⟦removed: …⟧. Still data, never instructions. */
+  markdown: string | null;
+  truncated: boolean;
+  /** injection verdict for the whole page (incl. hidden parts); local check on the markdown can only make it stricter */
+  verdict: GuardVerdict;
+  action: GuardAction;
+  score: number | null;
+  findings: RemoteFinding[];
+  freeCallsRemaining: number | null;
+  payment: PaymentNeeded | null;
+  receipt: unknown;
+  /** blocked by the site, not found, unsupported type, payment needed or network error — never charged unless ok */
+  error: string | null;
+}
+
+/**
+ * Read a public https URL as clean, injection-scrubbed Markdown for an LLM (Angel's /stealth-read: 3 free calls per agent,
+ * then 0.02 USDC via x402). One GET as a declared bot — no login, paywall or bot-protection bypass; a blocked page is never
+ * charged. Never throws: check ok and error.
+ */
+export async function readSafeUrl(url: string | URL, o: CommonOptions = {}): Promise<SafeReadResult> {
+  const raw = (url instanceof URL ? url.href : String(url ?? "")).trim();
+  const base: SafeReadResult = {
+    ok: false, url: raw, title: null, lang: null, markdown: null, truncated: false, verdict: "unchecked", action: "review",
+    score: null, findings: [], freeCallsRemaining: null, payment: null, receipt: null, error: null,
+  };
+  if (!/^https:\/\/\S+$/i.test(raw)) return { ...base, error: "url must be an absolute https URL" };
+  if (o.remote === false) return { ...base, error: "remote disabled: readSafeUrl needs Angel's hosted reader" };
+  const c = await post(PATHS.stealthRead, { url: raw }, o);
+  if (c.status === 200 && c.body && typeof c.body.markdown === "string") {
+    const remoteV = (["clean", "caution", "hostile"].includes(String(c.body.verdict)) ? c.body.verdict : "caution") as GuardVerdict;
+    const local = quickScan(c.body.markdown);
+    const verdict = stricter(remoteV, localVerdict(local) === "unchecked" ? "clean" : localVerdict(local));
+    return {
+      ok: true, url: typeof c.body.url === "string" ? c.body.url : raw,
+      title: typeof c.body.title === "string" ? c.body.title : null, lang: typeof c.body.lang === "string" ? c.body.lang : null,
+      markdown: local.cleaned, truncated: c.body.truncated === true,
+      verdict, action: ACTION[verdict], score: typeof c.body.score === "number" ? c.body.score : null,
+      findings: Array.isArray(c.body.findings) ? (c.body.findings as RemoteFinding[]) : [],
+      freeCallsRemaining: num(c.headers?.get("x-free-calls-remaining")), payment: null,
+      receipt: decodeReceipt(c.headers?.get("payment-response")), error: null,
+    };
+  }
+  if (c.status === 402) {
+    return { ...base, payment: paymentFrom(c), freeCallsRemaining: 0, error: "payment_required: free calls used; pay via x402 (pass a paying fetch) or by card" };
+  }
+  const why = typeof c.body?.message === "string" ? c.body.message : typeof c.body?.error === "string" ? c.body.error : null;
+  return { ...base, error: c.error ?? `stealth-read HTTP ${c.status}${why ? `: ${why}` : ""}` };
 }
 
 /* ------------------------------------------------------------------ verifyBeforePay */

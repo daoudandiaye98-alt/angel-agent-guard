@@ -1,6 +1,6 @@
 export {
-  ANGEL_BASE, PATHS, VERSION, guardUntrusted, verifyBeforePay,
-  type CommonOptions, type GuardAction, type GuardResult, type GuardVerdict, type PaymentNeeded,
+  ANGEL_BASE, PATHS, VERSION, guardUntrusted, readSafeUrl, verifyBeforePay,
+  type CommonOptions, type GuardAction, type GuardResult, type GuardVerdict, type PaymentNeeded, type SafeReadResult,
   type RemoteFinding, type VerifyOptions, type VerifyResult, type VerifyTarget,
 } from "./guard.js";
 export {

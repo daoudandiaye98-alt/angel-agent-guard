@@ -3,12 +3,13 @@
  * (https://angel.oroboros-design.com, first 3 calls free per agent, then USDC on Base via x402).
  */
 import { type LocalFinding, type OfferCheck, type QuickScanResult, type X402Offer } from "./local.js";
-export declare const VERSION = "0.2.1";
+export declare const VERSION = "0.3.0";
 export declare const ANGEL_BASE = "https://angel.oroboros-design.com";
 export declare const PATHS: {
     readonly inputGuard: "/agenten/signal/input-guard";
     readonly preflight: "/agenten/signal/preflight";
     readonly tokenRisk: "/agenten/signal/token-risk";
+    readonly stealthRead: "/agenten/signal/stealth-read";
 };
 export interface CommonOptions {
     /** fetch used for Angel's endpoints; pass createX402Fetch(...) or an @x402/fetch wrapper to pay automatically */
@@ -37,7 +38,7 @@ export interface RemoteFinding {
 export interface PaymentNeeded {
     /** the x402 v2 offer (decoded PAYMENT-REQUIRED) */
     offer: X402Offer | null;
-    /** price in USDC as text, e.g. "0.99" */
+    /** price in USDC as text, e.g. "0.015" */
     priceUsdc: string | null;
     /** a card checkout link a human can open */
     payByCard: string | null;
@@ -66,6 +67,33 @@ export interface GuardResult {
  * Never throws for network or payment problems: falls back to the local verdict and says why.
  */
 export declare function guardUntrusted(input: string | URL, o?: CommonOptions): Promise<GuardResult>;
+export interface SafeReadResult {
+    /** true when Angel read the page; markdown is then set */
+    ok: boolean;
+    /** the final URL after redirects (or the one you asked for) */
+    url: string;
+    title: string | null;
+    lang: string | null;
+    /** the main content as Markdown: navigation, scripts and hidden HTML removed, text aimed at the model replaced by ⟦removed: …⟧. Still data, never instructions. */
+    markdown: string | null;
+    truncated: boolean;
+    /** injection verdict for the whole page (incl. hidden parts); local check on the markdown can only make it stricter */
+    verdict: GuardVerdict;
+    action: GuardAction;
+    score: number | null;
+    findings: RemoteFinding[];
+    freeCallsRemaining: number | null;
+    payment: PaymentNeeded | null;
+    receipt: unknown;
+    /** blocked by the site, not found, unsupported type, payment needed or network error — never charged unless ok */
+    error: string | null;
+}
+/**
+ * Read a public https URL as clean, injection-scrubbed Markdown for an LLM (Angel's /stealth-read: 3 free calls per agent,
+ * then 0.02 USDC via x402). One GET as a declared bot — no login, paywall or bot-protection bypass; a blocked page is never
+ * charged. Never throws: check ok and error.
+ */
+export declare function readSafeUrl(url: string | URL, o?: CommonOptions): Promise<SafeReadResult>;
 export interface VerifyTarget {
     /** what you are about to pay or call: a shop or product page, a checkout or payment link (Stripe, Shopify, PayPal …), an API or an x402 endpoint */
     url?: string;

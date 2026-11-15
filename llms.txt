@@ -22,8 +22,8 @@
 
 ## Hosted checks
 
-- Base https://angel.oroboros-design.com; endpoints POST /agenten/signal/input-guard {text|url}, /agenten/signal/preflight {url, method} (any commerce URL), /agenten/signal/token-risk {token, chain}
-- 3 free calls per agent (X-Payer-Address or X-API-Key, else per IP); then USDC on Base via x402: pre-purchase check (preflight) 0.25, input guard 0.99, token risk 0.99 (under the $1 default cap of @x402/core)
+- Base https://angel.oroboros-design.com; endpoints POST /agenten/signal/stealth-read {url} (readSafeUrl: page as clean Markdown), /agenten/signal/input-guard {text|url}, /agenten/signal/preflight {url, method} (any commerce URL), /agenten/signal/token-risk {token, chain}
+- 3 free calls per agent (X-Payer-Address or X-API-Key, else per IP); then USDC on Base via x402: safe read 0.02, pre-purchase check (preflight) 0.015, input guard 0.015, token risk 0.015 (under the $1 default cap of @x402/core)
 - Docs: https://angel.oroboros-design.com/docs/prompt-injection-defense/ and https://angel.oroboros-design.com/docs/x402-integration-guide/
 
 ## Optional

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * angel-agent-guard-mcp — a local stdio MCP server with three tools:
+ * angel-agent-guard-mcp — a local stdio MCP server with four tools:
+ *   read_safe_url     read a URL as clean, injection-scrubbed Markdown
  *   guard_untrusted   check untrusted text or a URL before the model reads it
  *   verify_before_pay check an x402 endpoint and/or an ERC-20 before money moves
  *   quick_scan        local-only pass (invisible Unicode, tag smuggling, exfiltration images), free, offline
@@ -14,6 +15,26 @@
 import { type CommonOptions } from "./guard.js";
 type Json = Record<string, unknown>;
 export declare const TOOLS: readonly [{
+    readonly name: "read_safe_url";
+    readonly title: "Read a URL as clean, injection-scrubbed Markdown";
+    readonly description: string;
+    readonly inputSchema: {
+        readonly type: "object";
+        readonly properties: {
+            readonly url: {
+                readonly type: "string";
+                readonly pattern: "^https://";
+                readonly description: "the public https page to read";
+            };
+        };
+        readonly required: readonly ["url"];
+        readonly additionalProperties: false;
+    };
+    readonly annotations: {
+        readonly readOnlyHint: true;
+        readonly openWorldHint: true;
+    };
+}, {
     readonly name: "guard_untrusted";
     readonly title: "Check untrusted content for prompt injection";
     readonly description: string;

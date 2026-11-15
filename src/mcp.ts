@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * angel-agent-guard-mcp — a local stdio MCP server with three tools:
+ * angel-agent-guard-mcp — a local stdio MCP server with four tools:
+ *   read_safe_url     read a URL as clean, injection-scrubbed Markdown
  *   guard_untrusted   check untrusted text or a URL before the model reads it
  *   verify_before_pay check an x402 endpoint and/or an ERC-20 before money moves
  *   quick_scan        local-only pass (invisible Unicode, tag smuggling, exfiltration images), free, offline
@@ -13,7 +14,7 @@
  */
 
 import { createInterface } from "node:readline";
-import { guardUntrusted, verifyBeforePay, VERSION, type CommonOptions } from "./guard.js";
+import { guardUntrusted, readSafeUrl, verifyBeforePay, VERSION, type CommonOptions } from "./guard.js";
 import { quickScan } from "./local.js";
 import { createX402Fetch, resolveSigner } from "./pay.js";
 
@@ -23,13 +24,29 @@ const PROTOCOLS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
 
 export const TOOLS = [
   {
+    name: "read_safe_url",
+    title: "Read a URL as clean, injection-scrubbed Markdown",
+    description:
+      "Instead of fetching a web page yourself: Angel reads one public https URL and returns its main content as Markdown (navigation, scripts " +
+      "and HTML hidden from people removed), with text aimed at the model replaced by ⟦removed⟧, plus verdict clean|caution|hostile, findings, " +
+      "title and language. One GET as a declared bot — no login, paywall or bot-protection bypass; a blocked page is never charged. " +
+      "3 free calls per agent, then 0.02 USDC via x402.",
+    inputSchema: {
+      type: "object",
+      properties: { url: { type: "string", pattern: "^https://", description: "the public https page to read" } },
+      required: ["url"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: true, openWorldHint: true },
+  },
+  {
     name: "guard_untrusted",
     title: "Check untrusted content for prompt injection",
     description:
       "Before reading a web page, email, document, RAG chunk or tool result written by someone else: checks it for text aimed at the model " +
       "(instruction overrides, forged system or tool turns, requests for keys, the prompt or payments, exfiltration links), invisible Unicode " +
       "(tag smuggling decoded, zero-width, bidi), hidden HTML, homoglyphs and base64, in 17 languages. Returns verdict clean|caution|hostile, " +
-      "action use|read_only|drop|review, findings and a cleaned text to read as data. Local pass is free; the hosted check gives 3 free calls per agent, then 0.99 USDC via x402.",
+      "action use|read_only|drop|review, findings and a cleaned text to read as data. Local pass is free; the hosted check gives 3 free calls per agent, then 0.015 USDC via x402.",
     inputSchema: {
       type: "object",
       properties: {
@@ -48,7 +65,7 @@ export const TOOLS = [
       "checks TLS, domain age, look-alike domains, redirects, the payment provider, card fields and http forms, text aimed at AI agents in the page, " +
       "the x402 offer, and for a token honeypot/rug-pull traits. Returns ok, verdict pay|caution|do_not_pay, risk_score, reasons. " +
       "May add partner_link on pay (same merchant, Angel's disclosed affiliate tag; the checked URL is just as safe) and, for a low-risk token, " +
-      "the free swap-route (0.5 % fee, disclosed). 0.25 USDC per check (token 0.99) after 3 free calls.",
+      "the free swap-route (0.5 % fee, disclosed). 0.015 USDC per check after 3 free calls.",
     inputSchema: {
       type: "object",
       properties: {
@@ -87,6 +104,10 @@ export async function optionsFromEnv(env: NodeJS.ProcessEnv = process.env): Prom
 }
 
 export async function callTool(name: string, args: Json, o: CommonOptions & { maxAmountAtomic?: bigint }): Promise<Json> {
+  if (name === "read_safe_url") {
+    if (typeof args.url !== "string" || !args.url) throw new Error("send url");
+    return (await readSafeUrl(args.url, o)) as unknown as Json;
+  }
   if (name === "guard_untrusted") {
     const input = typeof args.url === "string" && args.url ? args.url : typeof args.text === "string" ? args.text : "";
     if (!input) throw new Error("send text or url");

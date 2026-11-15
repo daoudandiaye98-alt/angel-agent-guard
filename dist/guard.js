@@ -4,12 +4,13 @@
  */
 import { checkOffer, decodeOffer, localVerdict, looksLikeUrl, quickScan, } from "./local.js";
 import { decodeReceipt } from "./pay.js";
-export const VERSION = "0.2.1";
+export const VERSION = "0.3.0";
 export const ANGEL_BASE = "https://angel.oroboros-design.com";
 export const PATHS = {
     inputGuard: "/agenten/signal/input-guard",
     preflight: "/agenten/signal/preflight",
     tokenRisk: "/agenten/signal/token-risk",
+    stealthRead: "/agenten/signal/stealth-read",
 };
 const RANK = { clean: 0, unchecked: 1, caution: 2, hostile: 3 };
 const ACTION = { clean: "use", caution: "read_only", hostile: "drop", unchecked: "review" };
@@ -48,12 +49,18 @@ async function post(path, body, o) {
         return { status: 0, body: null, headers: null, error: e instanceof Error ? e.message : String(e) };
     }
 }
+/** atomic USDC (6 decimals) as text without trailing zeros: "15000" → "0.015", "990000" → "0.99", "1000000" → "1" */
+const usdcText = (atomic) => {
+    const n = BigInt(atomic);
+    const frac = (n % 1000000n).toString().padStart(6, "0").replace(/0+$/, "");
+    return `${n / 1000000n}${frac ? `.${frac}` : ""}`;
+};
 function paymentFrom(c) {
     const offer = decodeOffer(c.headers?.get("payment-required")) ?? (c.body && Array.isArray(c.body.accepts) ? c.body : null);
     const amount = offer?.accepts?.[0]?.amount;
     return {
         offer,
-        priceUsdc: amount ? (Number(amount) / 1e6).toFixed(2) : typeof c.body?.price_usd === "string" ? c.body.price_usd : null,
+        priceUsdc: amount ? usdcText(amount) : typeof c.body?.price_usd === "string" ? c.body.price_usd : null,
         payByCard: typeof c.body?.pay_by_card === "string" ? c.body.pay_by_card : null,
         message: typeof c.body?.task_blocked === "string" ? c.body.task_blocked : typeof c.body?.error === "string" ? c.body.error : null,
     };
@@ -96,6 +103,42 @@ export async function guardUntrusted(input, o = {}) {
         return { ...base, payment: paymentFrom(c), freeCallsRemaining: 0, error: "payment_required: free calls used; pay via x402 (pass a paying fetch) or by card" };
     }
     return { ...base, error: c.error ?? `input guard HTTP ${c.status}${typeof c.body?.message === "string" ? `: ${c.body.message}` : ""}` };
+}
+/**
+ * Read a public https URL as clean, injection-scrubbed Markdown for an LLM (Angel's /stealth-read: 3 free calls per agent,
+ * then 0.02 USDC via x402). One GET as a declared bot — no login, paywall or bot-protection bypass; a blocked page is never
+ * charged. Never throws: check ok and error.
+ */
+export async function readSafeUrl(url, o = {}) {
+    const raw = (url instanceof URL ? url.href : String(url ?? "")).trim();
+    const base = {
+        ok: false, url: raw, title: null, lang: null, markdown: null, truncated: false, verdict: "unchecked", action: "review",
+        score: null, findings: [], freeCallsRemaining: null, payment: null, receipt: null, error: null,
+    };
+    if (!/^https:\/\/\S+$/i.test(raw))
+        return { ...base, error: "url must be an absolute https URL" };
+    if (o.remote === false)
+        return { ...base, error: "remote disabled: readSafeUrl needs Angel's hosted reader" };
+    const c = await post(PATHS.stealthRead, { url: raw }, o);
+    if (c.status === 200 && c.body && typeof c.body.markdown === "string") {
+        const remoteV = (["clean", "caution", "hostile"].includes(String(c.body.verdict)) ? c.body.verdict : "caution");
+        const local = quickScan(c.body.markdown);
+        const verdict = stricter(remoteV, localVerdict(local) === "unchecked" ? "clean" : localVerdict(local));
+        return {
+            ok: true, url: typeof c.body.url === "string" ? c.body.url : raw,
+            title: typeof c.body.title === "string" ? c.body.title : null, lang: typeof c.body.lang === "string" ? c.body.lang : null,
+            markdown: local.cleaned, truncated: c.body.truncated === true,
+            verdict, action: ACTION[verdict], score: typeof c.body.score === "number" ? c.body.score : null,
+            findings: Array.isArray(c.body.findings) ? c.body.findings : [],
+            freeCallsRemaining: num(c.headers?.get("x-free-calls-remaining")), payment: null,
+            receipt: decodeReceipt(c.headers?.get("payment-response")), error: null,
+        };
+    }
+    if (c.status === 402) {
+        return { ...base, payment: paymentFrom(c), freeCallsRemaining: 0, error: "payment_required: free calls used; pay via x402 (pass a paying fetch) or by card" };
+    }
+    const why = typeof c.body?.message === "string" ? c.body.message : typeof c.body?.error === "string" ? c.body.error : null;
+    return { ...base, error: c.error ?? `stealth-read HTTP ${c.status}${why ? `: ${why}` : ""}` };
 }
 const VRANK = { pay: 0, unchecked: 1, caution: 2, do_not_pay: 3 };
 const vmax = (a, b) => (VRANK[a] >= VRANK[b] ? a : b);

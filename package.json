@@ -1,6 +1,6 @@
 {
   "name": "angel-agent-guard",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Guard an AI agent before it acts: prompt-injection check for untrusted content, and a pre-purchase check for any shop, checkout or payment link, paid API, x402 endpoint or ERC-20 (TLS, domain age, look-alikes, redirects, payment provider, injection scan). Zero runtime dependencies, x402 v2 payer, stdio MCP server, Vercel AI SDK tools, Coinbase AgentKit actions.",
   "mcpName": "com.oroboros-design.angel/agent-guard",
   "keywords": [

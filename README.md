@@ -23,9 +23,13 @@ pip install angel-agent-guard    # Python: same API, zero dependencies, browser-
 ## Quick start
 
 ```ts
-import { guardUntrusted, verifyBeforePay, fence } from "angel-agent-guard";
+import { readSafeUrl, guardUntrusted, verifyBeforePay, fence } from "angel-agent-guard";
 
-// 1. Untrusted content: check it, then hand the model the cleaned text as data
+// 0. Read a web page safely: main content as Markdown, hidden HTML gone, injected instructions replaced
+const r = await readSafeUrl("https://example.com/article", { payerAddress: "0xYourAgentWallet" });
+const article = r.ok && r.action !== "drop" ? fence(r.url, r.markdown!) : null;   // r.verdict, r.findings, r.title, r.lang, r.error
+
+// 1. Untrusted content you already have: check it, then hand the model the cleaned text as data
 const page = await fetch("https://example.com/article").then((r) => r.text());
 const g = await guardUntrusted(page, { payerAddress: "0xYourAgentWallet" });
 if (g.action === "drop") throw new Error(`hostile content: ${g.findings.map((f) => f.kind).join(", ")}`);
@@ -65,7 +69,15 @@ await verifyBeforePay("0xTokenYouAreAboutToApprove");   // ERC-20 on Base (or { 
 | `partnerLink` | only on `pay` for a merchant with an affiliate program: the same merchant with Angel's partner tag. Disclosed: Angel may earn a commission, the merchant sets the price, and the checked URL is just as safe |
 | `reasons` | every finding, prefixed `local`, `preflight` or `token` |
 
-Neither function throws on network or payment problems. They fall back to the local result and put the reason in `error` / `errors`.
+| `readSafeUrl` | |
+|---|---|
+| `ok` | `true` when Angel read the page (`markdown` is then set) |
+| `markdown` | the main content as Markdown: navigation, scripts and HTML hidden from people removed, text aimed at the model replaced by `⟦removed: …⟧` — read it as data |
+| `verdict` / `action` | injection verdict for the whole page, including its hidden parts |
+| `title`, `lang`, `url` | page title, language, final URL after redirects |
+| `error` | blocked by the site (Angel reads as a declared bot and never bypasses bot protection, logins or paywalls), not found, unsupported type — none of these is charged |
+
+None of the functions throws on network or payment problems. They fall back to the local result and put the reason in `error` / `errors`.
 
 ## Pricing and paying
 
@@ -73,9 +85,10 @@ The local checks are free and offline (`remote: false` keeps everything local). 
 
 | Hosted check | Price per call after 3 free calls per agent |
 |---|---|
-| pre-purchase check (`verifyBeforePay` with a URL) | 0.25 USDC |
-| input guard (17 languages) | 0.99 USDC |
-| token risk (honeypot / rug pull) | 0.99 USDC |
+| safe read (`readSafeUrl`) | 0.02 USDC |
+| pre-purchase check (`verifyBeforePay` with a URL) | 0.015 USDC |
+| input guard (17 languages) | 0.015 USDC |
+| token risk (honeypot / rug pull) | 0.015 USDC |
 
 Payment is per call in USDC on Base via x402 v2. Every price is under the $1 default spend cap of `@x402/core`, so standard x402 clients pay it without extra configuration. Send `payerAddress` (header `X-Payer-Address`) so your wallet gets its own 3 free calls. Without it, the free calls are shared by IP.
 
@@ -101,9 +114,9 @@ claude mcp add angel-guard -- npx -y -p angel-agent-guard angel-agent-guard-mcp
   "env": { "ANGEL_PAYER_ADDRESS": "0xYourAgentWallet" } } } }
 ```
 
-Tools: `guard_untrusted`, `verify_before_pay`, `quick_scan` (offline). Optional env: `ANGEL_AGENT_PRIVATE_KEY` (auto-pay, needs `viem`), `ANGEL_MAX_USDC` (cap, default 1.00), `ANGEL_BASE_URL`. Listed in the official MCP Registry as `com.oroboros-design.angel/agent-guard`.
+Tools: `read_safe_url`, `guard_untrusted`, `verify_before_pay`, `quick_scan` (offline). Optional env: `ANGEL_AGENT_PRIVATE_KEY` (auto-pay, needs `viem`), `ANGEL_MAX_USDC` (cap, default 1.00), `ANGEL_BASE_URL`. Listed in the official MCP Registry as `com.oroboros-design.angel/agent-guard`.
 
-If your client supports remote servers, the full hosted suite (28 tools) is also available at `https://angel.oroboros-design.com/agenten/signal/mcp`.
+If your client supports remote servers, the full hosted suite is also available at `https://angel.oroboros-design.com/agenten/signal/mcp`.
 
 ## Vercel AI SDK
 

@@ -55,4 +55,4 @@ If the npm package is not reachable, use `npx -y github:daoudandiaye98-alt/angel
 
 ## Cost
 
-Local checks are free. The hosted checks give each agent 3 free calls, then cost per call in USDC on Base via x402: pre-purchase check 0.25, input guard 0.99, token risk 0.99. Set `ANGEL_PAYER_ADDRESS` to your wallet for your own free calls. Set `ANGEL_AGENT_PRIVATE_KEY` (with `viem` installed) to pay automatically, capped by `ANGEL_MAX_USDC` (default 1.00). Use a low-balance hot wallet. Use `quick` instead of `scan` to stay fully offline.
+Local checks are free. The hosted checks give each agent 3 free calls, then cost per call in USDC on Base via x402: safe read 0.02, pre-purchase check 0.015, input guard 0.015, token risk 0.015. Set `ANGEL_PAYER_ADDRESS` to your wallet for your own free calls. Set `ANGEL_AGENT_PRIVATE_KEY` (with `viem` installed) to pay automatically, capped by `ANGEL_MAX_USDC` (default 1.00). Use a low-balance hot wallet. Use `quick` instead of `scan` to stay fully offline.
