@@ -1,31 +1,20 @@
 {
   "actorSpecification": 1,
-  "name": "safe-web-reader",
-  "title": "Safe Web Reader for LLMs — URL to clean Markdown, prompt-injection scrubbed",
-  "description": "Turn any public URL into clean Markdown for your LLM or agent: main content only, navigation and hidden HTML removed, prompt-injection and invisible-Unicode tricks neutralized, with a verdict and findings per page.",
-  "version": "1.0",
-  "buildTag": "latest",
+  "name": "tradesignal-free-tools",
+  "title": "AI Agent Safe Web Reader: Clean Markdown, Hidden Text Removed",
+  "description": "Read any public URL as clean Markdown for an LLM or AI agent: navigation and scripts removed, hidden HTML and invisible Unicode stripped, injected instructions replaced, verdict per page. Blocked pages are not charged.",
+  "version": "1.1",
   "input": "./input_schema.json",
   "dockerfile": "../Dockerfile",
+  "readme": "../README.md",
   "storages": {
     "dataset": {
       "actorSpecification": 1,
       "views": {
         "overview": {
           "title": "Pages",
-          "transformation": { "fields": ["url", "title", "verdict", "score", "words", "markdown", "error"] },
-          "display": {
-            "component": "table",
-            "properties": {
-              "url": { "label": "URL", "format": "link" },
-              "title": { "label": "Title", "format": "text" },
-              "verdict": { "label": "Injection verdict", "format": "text" },
-              "score": { "label": "Risk score", "format": "number" },
-              "words": { "label": "Words", "format": "number" },
-              "markdown": { "label": "Markdown", "format": "text" },
-              "error": { "label": "Error (not charged)", "format": "text" }
-            }
-          }
+          "transformation": { "fields": ["url", "title", "verdict", "score", "chars", "error", "markdown"] },
+          "display": { "component": "table" }
         }
       }
     }

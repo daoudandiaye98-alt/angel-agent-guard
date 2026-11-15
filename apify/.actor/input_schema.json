@@ -4,23 +4,26 @@
   "schemaVersion": 1,
   "properties": {
     "startUrls": {
-      "title": "URLs to read",
+      "title": "Pages to read",
       "type": "array",
-      "description": "Public https pages. Each is fetched once (no crawling), up to 1 MB and 10 s.",
+      "description": "Public https pages. Each one comes back as clean Markdown with hidden text removed, plus an injection verdict. Blocked pages are reported and not charged.",
       "editor": "requestListSources",
-      "prefill": [{ "url": "https://en.wikipedia.org/wiki/Prompt_injection" }]
-    },
-    "includeFindings": {
-      "title": "Include injection findings",
-      "type": "boolean",
-      "description": "Add every finding (kind, severity, where, excerpt) to the output.",
-      "default": true
+      "prefill": [
+        { "url": "https://angel.oroboros-design.com/docs/prompt-injection-defense/" },
+        { "url": "https://en.wikipedia.org/wiki/Prompt_injection" }
+      ]
     },
     "dropHostile": {
-      "title": "Drop hostile pages",
+      "title": "Drop Markdown of hostile pages",
       "type": "boolean",
-      "description": "Leave out the Markdown of pages whose verdict is hostile (the record stays, with findings).",
+      "description": "If a page is judged hostile, return its verdict and findings but no Markdown, so nothing from it reaches your model.",
       "default": false
+    },
+    "includeFindings": {
+      "title": "Include findings",
+      "type": "boolean",
+      "description": "Every finding with kind, severity and where it was (visible, hidden, decoded).",
+      "default": true
     }
   },
   "required": ["startUrls"]
