@@ -24,8 +24,18 @@ if (!urls.length) {
 const token = process.env.ANGEL_BUNDLE_TOKEN;
 if (!token) await Actor.fail("Missing ANGEL_BUNDLE_TOKEN (Actor owner setting).");
 
+// Until pay-per-event is active for a run, the Actor reads at most FREE_PREVIEW pages per run (a preview, not a free API).
+const FREE_PREVIEW = 3;
+let ppe = false;
+try {
+  const info = Actor.getChargingManager().getPricingInfo();
+  ppe = info?.isPayPerEvent === true || info?.pricingModel === "PAY_PER_EVENT";
+} catch { ppe = false; }
+const queue = ppe ? urls : urls.slice(0, FREE_PREVIEW);
+const skipped = urls.length - queue.length;
+
 let read = 0, failed = 0;
-for (const url of urls) {
+for (const url of queue) {
   let status = 0, body = null;
   try {
     const r = await fetch(ENDPOINT, {
@@ -48,13 +58,14 @@ for (const url of urls) {
       ...(input.includeFindings === false ? {} : { findings: body.findings ?? [] }),
       removed: body.removed ?? null, extractedFrom: body.extracted_from ?? null, fetchedAt: body.asof ?? new Date().toISOString(), error: null,
     });
-    await Actor.charge({ eventName: "page-read" });
+    const charged = await Actor.charge({ eventName: "page-read" });
     read += 1;
+    if (charged?.eventChargeLimitReached) break;
   } else {
     const why = body?.message ?? body?.error ?? `HTTP ${status}`;
     await Actor.pushData({ url, requestedUrl: url, title: null, verdict: null, score: null, words: 0, markdown: null, error: `${why} (not charged)` });
     failed += 1;
   }
 }
-await Actor.setStatusMessage(`${read} page(s) read, ${failed} not read (not charged).`);
+await Actor.setStatusMessage(`${read} page(s) read, ${failed} not read (not charged)` + (skipped > 0 ? `, ${skipped} skipped: preview runs read up to ${FREE_PREVIEW} pages.` : "."));
 await Actor.exit();
