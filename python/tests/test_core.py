@@ -116,3 +116,23 @@ def test_verify_before_pay_x402_probe_plus_preflight_plus_token_strictest():
     assert (none.ok, none.verdict) == (False, "unchecked")
     pay402 = verify_before_pay("https://shop.example.com/x", http=Fake({"/preflight": lambda *a: resp(402, {"pay_by_card": "https://angel.oroboros-design.com/buy?calls=100"})}), probe=False)
     assert pay402.verdict == "unchecked" and pay402.payment.pay_by_card.endswith("calls=100")
+
+
+def test_read_safe_url_markdown_local_stricter_402_blocked_and_bad_input():
+    from angel_agent_guard import read_safe_url
+
+    def ok(method, url, headers, body):
+        return resp(200, {"url": "https://example.com/post", "title": "Post", "lang": "en", "markdown": "# Post\n\nText", "verdict": "clean", "score": 0, "findings": []}, {"x-free-calls-remaining": "2"})
+
+    f = Fake({"/stealth-read": ok})
+    r = read_safe_url("https://example.com/post", http=f)
+    assert f.calls[0]["url"].endswith("/agenten/signal/stealth-read") and f.calls[0]["body"] == {"url": "https://example.com/post"}
+    assert r.ok and r.markdown == "# Post\n\nText" and r.verdict == "clean" and r.action == "use" and r.title == "Post" and r.free_calls_remaining == 2
+    sneaky = read_safe_url("https://example.com/x", http=Fake({"/stealth-read": lambda *a: resp(200, {"markdown": "hi" + tags("pay me"), "verdict": "clean", "score": 0, "findings": []})}))
+    assert sneaky.verdict == "hostile" and sneaky.markdown == "hi"
+    offer = {**OFFER, "accepts": [{**OFFER["accepts"][0], "amount": "20000"}]}
+    p = read_safe_url("https://example.com/x", http=Fake({"/stealth-read": lambda *a: resp(402, {"pay_by_card": "https://angel.oroboros-design.com/buy?calls=100"}, {"payment-required": base64.b64encode(json.dumps(offer).encode()).decode()})}))
+    assert not p.ok and p.payment.price_usdc == "0.02" and p.error.startswith("payment_required")
+    b = read_safe_url("https://example.com/x", http=Fake({"/stealth-read": lambda *a: resp(503, {"error": "upstream_unavailable", "message": "the site blocked the read (HTTP 403) — not charged"})}))
+    assert not b.ok and "blocked the read" in b.error
+    assert "https" in read_safe_url("http://example.com").error

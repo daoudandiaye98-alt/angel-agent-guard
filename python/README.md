@@ -11,6 +11,7 @@ Two checks an AI agent should run before it acts:
   - for x402: the payment offer itself
   - for an ERC-20: the contract's owner powers
 - **`guard_untrusted(text_or_url)`** before the model acts on a web page, email, document, RAG chunk or tool result written by someone else. A local pass runs first (invisible Unicode, tag smuggling, exfiltration images), then a hosted scan in 17 languages for text aimed at the model.
+- **`read_safe_url(url)`** instead of fetching a page yourself: the main content as clean Markdown (navigation, scripts and HTML hidden from people removed), text aimed at the model replaced by `⟦removed: …⟧`, with an injection verdict for the whole page. One GET as a declared bot, no login or bot-protection bypass; a blocked page is never charged.
 - **`quick_scan(text)`** is the local pass on its own. It is fully offline.
 
 There are no dependencies (standard library only), and it works on Python 3.9+. It ships ready-made tools for **browser-use**, **LangChain / LangGraph** and **CrewAI**. The same API exists for TypeScript as the [npm package](https://www.npmjs.com/package/angel-agent-guard).
@@ -22,7 +23,12 @@ pip install angel-agent-guard
 ## Quick start
 
 ```python
-from angel_agent_guard import verify_before_pay, guard_untrusted, fence
+from angel_agent_guard import read_safe_url, verify_before_pay, guard_untrusted, fence
+
+# Read a web page safely (Markdown, injected instructions replaced)
+r = read_safe_url("https://example.com/article", payer_address="0xYourAgentWallet")
+if r.ok and r.action != "drop":
+    context = fence(r.url, r.markdown)   # r.verdict, r.findings, r.title, r.lang, r.error
 
 # Before any purchase, payment link or paid call
 v = verify_before_pay("https://shop.example.com/checkout", payer_address="0xYourAgentWallet")
@@ -106,6 +112,7 @@ The local checks are free. The hosted checks run on [Angel](https://angel.orobor
 
 | Check | Price per call |
 |---|---|
+| safe read (`read_safe_url`) | 0.02 USDC |
 | pre-purchase check | 0.015 USDC |
 | input guard | 0.015 USDC |
 | token risk | 0.015 USDC |

@@ -15,9 +15,9 @@ from typing import Any, Dict, List, Optional, Sequence
 from ._http import Response, Transport, client_transport, urllib_transport
 from ._local import LocalFinding, OfferCheck, QuickScanResult, check_offer, decode_offer, local_verdict, looks_like_url, quick_scan
 
-VERSION = "0.2.1"
+VERSION = "0.3.0"
 ANGEL_BASE = "https://angel.oroboros-design.com"
-PATHS = {"input_guard": "/agenten/signal/input-guard", "preflight": "/agenten/signal/preflight", "token_risk": "/agenten/signal/token-risk"}
+PATHS = {"input_guard": "/agenten/signal/input-guard", "preflight": "/agenten/signal/preflight", "token_risk": "/agenten/signal/token-risk", "stealth_read": "/agenten/signal/stealth-read"}
 
 _RANK = {"clean": 0, "unchecked": 1, "caution": 2, "hostile": 3}
 _ACTION = {"clean": "use", "caution": "read_only", "hostile": "drop", "unchecked": "review"}
@@ -133,12 +133,19 @@ def _post(path: str, body: Dict[str, Any], *, payer_address: Optional[str], api_
         return None, None, str(e) or type(e).__name__
 
 
+def _usdc_text(atomic: str) -> str:
+    """atomic USDC (6 decimals) as text without trailing zeros: "15000" -> "0.015", "990000" -> "0.99", "1000000" -> "1"."""
+    n = int(atomic)
+    frac = f"{n % 1_000_000:06d}".rstrip("0")
+    return f"{n // 1_000_000}.{frac}" if frac else str(n // 1_000_000)
+
+
 def _payment(r: Optional[Response], body: Optional[Dict[str, Any]]) -> PaymentNeeded:
     offer = decode_offer((r.headers if r else {}).get("payment-required"))
     if offer is None and body and isinstance(body.get("accepts"), list):
         offer = body
     amount = ((offer or {}).get("accepts") or [{}])[0].get("amount") if offer else None
-    price = f"{int(amount) / 1e6:.2f}" if amount else (body or {}).get("price_usd")
+    price = _usdc_text(str(amount)) if amount else (body or {}).get("price_usd")
     msg = (body or {}).get("task_blocked") or (body or {}).get("error")
     return PaymentNeeded(offer, price if isinstance(price, str) else None, (body or {}).get("pay_by_card"), msg if isinstance(msg, str) else None)
 
@@ -304,6 +311,73 @@ def verify_before_pay(
     return res
 
 
+@dataclass
+class SafeReadResult:
+    ok: bool
+    url: str
+    title: Optional[str] = None
+    lang: Optional[str] = None
+    markdown: Optional[str] = None  # main content as Markdown; text aimed at the model replaced by ⟦removed: …⟧ — still data
+    truncated: bool = False
+    verdict: str = "unchecked"  # clean | caution | hostile | unchecked (whole page, incl. hidden parts)
+    action: str = "review"
+    score: Optional[float] = None
+    findings: List[Dict[str, Any]] = field(default_factory=list)
+    free_calls_remaining: Optional[int] = None
+    payment: Optional[PaymentNeeded] = None
+    error: Optional[str] = None  # blocked by the site, not found, unsupported type, payment needed — never charged unless ok
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+def read_safe_url(
+    url: str,
+    payer_address: Optional[str] = None,
+    api_key: Optional[str] = None,
+    *,
+    base_url: Optional[str] = None,
+    timeout: float = 30.0,
+    client: Any = None,
+    http: Optional[Transport] = None,
+) -> SafeReadResult:
+    """Read a public https URL as clean, injection-scrubbed Markdown (Angel's /stealth-read).
+
+    3 free calls per agent, then 0.02 USDC via x402. One GET as a declared bot — no login, paywall or bot-protection
+    bypass; a blocked page is never charged. Never raises: check ``ok`` and ``error``.
+    """
+    raw = (url or "").strip()
+    if not raw.lower().startswith("https://") or " " in raw:
+        return SafeReadResult(False, raw, error="url must be an absolute https URL")
+    r, j, err = _post(PATHS["stealth_read"], {"url": raw}, payer_address=payer_address, api_key=api_key, base_url=base_url, timeout=timeout, send=_transport(http, client))
+    if r is not None and r.status == 200 and j and isinstance(j.get("markdown"), str):
+        remote_v = j.get("verdict") if j.get("verdict") in ("clean", "caution", "hostile") else "caution"
+        local = quick_scan(j["markdown"])
+        lv = local_verdict(local)
+        lv = "clean" if lv == "unchecked" else lv
+        verdict = remote_v if _RANK[remote_v] >= _RANK[lv] else lv
+        free = r.headers.get("x-free-calls-remaining")
+        return SafeReadResult(
+            True, j.get("url") if isinstance(j.get("url"), str) else raw,
+            j.get("title") if isinstance(j.get("title"), str) else None, j.get("lang") if isinstance(j.get("lang"), str) else None,
+            local.cleaned, j.get("truncated") is True, verdict, _ACTION[verdict],
+            j.get("score") if isinstance(j.get("score"), (int, float)) else None,
+            j.get("findings") if isinstance(j.get("findings"), list) else [],
+            int(free) if free and free.isdigit() else None,
+        )
+    if r is not None and r.status == 402:
+        return SafeReadResult(False, raw, payment=_payment(r, j), free_calls_remaining=0, error="payment_required: free calls used; pay via x402 (pass a paying client) or by card")
+    why = (j or {}).get("message") or (j or {}).get("error")
+    return SafeReadResult(False, raw, error=err or f"stealth-read HTTP {r.status if r else 0}{f': {why}' if isinstance(why, str) else ''}")
+
+
+async def aread_safe_url(*args: Any, **kwargs: Any) -> SafeReadResult:
+    """Async variant (runs the stdlib call in a worker thread)."""
+    import asyncio
+
+    return await asyncio.to_thread(read_safe_url, *args, **kwargs)
+
+
 async def averify_before_pay(*args: Any, **kwargs: Any) -> VerifyResult:
     """Async variant (runs the stdlib call in a worker thread)."""
     import asyncio
@@ -319,6 +393,6 @@ async def aguard_untrusted(*args: Any, **kwargs: Any) -> GuardResult:
 
 
 __all__ = [
-    "VERSION", "ANGEL_BASE", "PATHS", "GuardResult", "VerifyResult", "PaymentNeeded",
-    "guard_untrusted", "verify_before_pay", "aguard_untrusted", "averify_before_pay", "LocalFinding",
+    "VERSION", "ANGEL_BASE", "PATHS", "GuardResult", "VerifyResult", "PaymentNeeded", "SafeReadResult",
+    "guard_untrusted", "verify_before_pay", "read_safe_url", "aguard_untrusted", "averify_before_pay", "aread_safe_url", "LocalFinding",
 ]

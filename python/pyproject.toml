@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "angel-agent-guard"
-version = "0.2.1"
+version = "0.3.0"
 description = "Guard an AI agent before it acts: pre-purchase check for any shop, checkout or payment link, paid API, x402 endpoint or token, and a prompt-injection check for untrusted content. Zero dependencies; browser-use, LangChain/LangGraph and CrewAI tools included."
 readme = "README.md"
 license = "MIT"
