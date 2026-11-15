@@ -1,0 +1,11 @@
+{
+  "name": "angel-safe-web-reader",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Apify Actor: read URLs as clean, prompt-injection-scrubbed Markdown for LLMs and agents (Angel stealth-read).",
+  "main": "main.js",
+  "scripts": { "start": "node main.js" },
+  "dependencies": { "apify": "^3.4.0" },
+  "license": "MIT"
+}

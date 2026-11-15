@@ -1,0 +1,33 @@
+{
+  "actorSpecification": 1,
+  "name": "safe-web-reader",
+  "title": "Safe Web Reader for LLMs — URL to clean Markdown, prompt-injection scrubbed",
+  "description": "Turn any public URL into clean Markdown for your LLM or agent: main content only, navigation and hidden HTML removed, prompt-injection and invisible-Unicode tricks neutralized, with a verdict and findings per page.",
+  "version": "1.0",
+  "buildTag": "latest",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile",
+  "storages": {
+    "dataset": {
+      "actorSpecification": 1,
+      "views": {
+        "overview": {
+          "title": "Pages",
+          "transformation": { "fields": ["url", "title", "verdict", "score", "words", "markdown", "error"] },
+          "display": {
+            "component": "table",
+            "properties": {
+              "url": { "label": "URL", "format": "link" },
+              "title": { "label": "Title", "format": "text" },
+              "verdict": { "label": "Injection verdict", "format": "text" },
+              "score": { "label": "Risk score", "format": "number" },
+              "words": { "label": "Words", "format": "number" },
+              "markdown": { "label": "Markdown", "format": "text" },
+              "error": { "label": "Error (not charged)", "format": "text" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
