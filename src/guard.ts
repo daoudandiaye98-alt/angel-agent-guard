@@ -9,7 +9,7 @@ import {
 } from "./local.js";
 import { decodeReceipt } from "./pay.js";
 
-export const VERSION = "0.3.0";
+export const VERSION = "0.4.0";
 export const ANGEL_BASE = "https://angel.oroboros-design.com";
 export const PATHS = {
   inputGuard: "/agenten/signal/input-guard",

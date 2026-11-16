@@ -1,6 +1,18 @@
 # angel-agent-guard (Python)
 
-Two checks an AI agent should run before it acts:
+**New in 0.4: Angel Shield, the spend firewall for agents with a wallet.** `shield_check(payment)` answers allow, hold or block before your agent pays: spend rules and daily budget (reserved atomically), merchant URL, the text that triggered the payment, non-USDC tokens. Fail-closed by default.
+
+```python
+from angel_agent_guard import shield_check, shield_confirm
+
+r = shield_check({"amount_usd": 12.5, "merchant_url": "https://shop.example.com/checkout"},
+                 trigger=user_message, policy_id="pol_…", bundle_token=ANGEL_KEY)  # free key: POST https://angel.oroboros-design.com/shield/keys
+if r.allowed:
+    tx = pay()                                  # your payment
+    shield_confirm(r.reservation_id, tx, bundle_token=ANGEL_KEY)
+```
+
+Plus the checks an AI agent should run before it acts:
 
 - **`verify_before_pay(url_or_token)`** before **any purchase or paid call**. That covers a shop or product page, a checkout or payment link (Stripe, Shopify, PayPal, SaaS checkout), an unknown paid API, an x402 endpoint, and a token swap or approval. It checks:
   - TLS and domain age

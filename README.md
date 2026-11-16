@@ -1,6 +1,26 @@
 # angel-agent-guard
 
-Two checks an AI agent should run before it acts:
+## New in 0.4: Angel Shield, the spend firewall for agents with a wallet
+
+Before your agent pays, `shieldCheck` answers **allow**, **hold** or **block**, with reasons. One call checks your spend rules (per-payment cap, daily budget reserved atomically so parallel agents cannot overspend, allow/block lists, chains, tokens, approval threshold, hold new merchants, kill switch), the merchant URL, the text that triggered the payment (prompt injection) and non-USDC tokens. Wallet limits check *how much*; Shield also checks *why*.
+
+```ts
+import { createShieldedFetch, shieldCheck, shieldPolicy } from "angel-agent-guard";
+
+// free key: POST https://angel.oroboros-design.com/shield/keys (100 checks) · plans: https://angel.oroboros-design.com/shield
+const { policyId } = await shieldPolicy({ name: "shopper", maxPerPaymentUsd: 50, dailyBudgetUsd: 200, holdNewMerchants: true }, { bundleToken: process.env.ANGEL_KEY });
+
+// any payment: card checkout, payment link, transfer
+const s = await shieldCheck({ amountUsd: 12.5, merchantUrl: "https://shop.example.com/checkout" }, { bundleToken: process.env.ANGEL_KEY, policyId, trigger: userMessage });
+if (s.decision !== "allow") throw new Error(s.reasons.join("; "));   // pay, then shieldConfirm(s.reservationId, tx)
+
+// x402: every 402 offer is checked by Shield before it is signed; confirm/release happens for you
+const pay = createShieldedFetch({ privateKey: process.env.AGENT_KEY, bundleToken: process.env.ANGEL_KEY, policyId });
+```
+
+Fail-closed: if Shield cannot be reached, the decision is `hold` and nothing is signed. See the replay of the May 2026 Grok × Bankrbot wallet drain: https://angel.oroboros-design.com/shield/lab
+
+Plus the guards an AI agent should run before it acts:
 
 - **`guardUntrusted(textOrUrl)`**: before the model reads a web page, email, document, RAG chunk or tool result written by someone else. It runs a local pass first (invisible Unicode, tag smuggling, exfiltration images), then a hosted scan in 17 languages for text aimed at the model.
 - **`verifyBeforePay(urlOrToken)`**: before **any online purchase or paid call**. That covers a shop or product page, a checkout or payment link (Stripe, Shopify, PayPal, SaaS checkout), an unknown API, an x402 endpoint, and a token swap or approval. It checks:

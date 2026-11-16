@@ -1,11 +1,11 @@
 # angel-agent-guard
 
-> MIT-licensed TypeScript library, CLI and stdio MCP server that guard an AI agent before it acts: guardUntrusted(textOrUrl) checks untrusted content for prompt injection (local pass + hosted 17-language scan), verifyBeforePay(urlOrToken) checks any shop, checkout or payment link, paid API, x402 endpoint or ERC-20 before buying, paying or approving (TLS, domain age, look-alikes, redirects, payment provider, card fields, injection scan of the page). Zero runtime dependencies; optional viem for automatic x402 v2 payments.
+> MIT-licensed TypeScript library, CLI and stdio MCP server that guard an AI agent before it acts. New in 0.4: Angel Shield (shieldCheck, createShieldedFetch), the spend firewall that answers allow | hold | block before an agent pays (spend rules, daily budget reserved atomically, merchant check, prompt-injection scan of the trigger, token risk; free key at https://angel.oroboros-design.com/shield/keys). Also: guardUntrusted(textOrUrl) checks untrusted content for prompt injection (local pass + hosted 17-language scan), verifyBeforePay(urlOrToken) checks any shop, checkout or payment link, paid API, x402 endpoint or ERC-20 before buying, paying or approving (TLS, domain age, look-alikes, redirects, payment provider, card fields, injection scan of the page). Zero runtime dependencies; optional viem for automatic x402 v2 payments.
 
 ## Install
 
 - `npm i angel-agent-guard` (add `viem` to pay automatically)
-- MCP (stdio): `npx -y -p angel-agent-guard angel-agent-guard-mcp`; tools guard_untrusted, verify_before_pay, quick_scan
+- MCP (stdio): `npx -y -p angel-agent-guard angel-agent-guard-mcp`; tools shield_check, read_safe_url, guard_untrusted, verify_before_pay, quick_scan (env ANGEL_BUNDLE_TOKEN, ANGEL_SHIELD_POLICY)
 - Coinbase AgentKit: `import { angelGuardActionProvider } from "angel-agent-guard/agentkit"`
 - CLI: `npx angel-agent-guard scan "<text>"`, `npx angel-agent-guard verify <url> | --token 0x...`
 
