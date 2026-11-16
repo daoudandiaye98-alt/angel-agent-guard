@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Sequence
 from ._http import Response, Transport, client_transport, urllib_transport
 from ._local import LocalFinding, OfferCheck, QuickScanResult, check_offer, decode_offer, local_verdict, looks_like_url, quick_scan
 
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 ANGEL_BASE = "https://angel.oroboros-design.com"
 PATHS = {"input_guard": "/agenten/signal/input-guard", "preflight": "/agenten/signal/preflight", "token_risk": "/agenten/signal/token-risk", "stealth_read": "/agenten/signal/stealth-read"}
 

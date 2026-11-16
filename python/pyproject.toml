@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "angel-agent-guard"
-version = "0.3.0"
-description = "Guard an AI agent before it acts: pre-purchase check for any shop, checkout or payment link, paid API, x402 endpoint or token, and a prompt-injection check for untrusted content. Zero dependencies; browser-use, LangChain/LangGraph and CrewAI tools included."
+version = "0.4.0"
+description = "Angel Shield, the spend firewall for AI agents (allow, hold or block a payment before it happens), plus guards before an agent acts: pre-purchase check for any shop, checkout or payment link, paid API, x402 endpoint or token, and a prompt-injection check for untrusted content. Zero dependencies; browser-use, LangChain/LangGraph and CrewAI tools included."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.9"
 authors = [{ name = "Oroboros Design" }]
-keywords = ["ai-agent", "agent-security", "prompt-injection", "shopping-agent", "agentic-commerce", "checkout", "phishing", "x402", "usdc", "base", "browser-use", "langchain", "langgraph", "crewai", "mcp"]
+keywords = ["spend-firewall", "agent-wallet", "spending-limits", "agent-payments", "ai-agent", "agent-security", "prompt-injection", "shopping-agent", "agentic-commerce", "checkout", "phishing", "x402", "usdc", "base", "browser-use", "langchain", "langgraph", "crewai", "mcp"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",

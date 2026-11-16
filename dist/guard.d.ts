@@ -3,7 +3,7 @@
  * (https://angel.oroboros-design.com, first 3 calls free per agent, then USDC on Base via x402).
  */
 import { type LocalFinding, type OfferCheck, type QuickScanResult, type X402Offer } from "./local.js";
-export declare const VERSION = "0.3.0";
+export declare const VERSION = "0.4.0";
 export declare const ANGEL_BASE = "https://angel.oroboros-design.com";
 export declare const PATHS: {
     readonly inputGuard: "/agenten/signal/input-guard";
